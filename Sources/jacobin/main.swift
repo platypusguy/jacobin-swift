@@ -8,33 +8,40 @@
 /// main line of jacobin
 
 import Dispatch
+import Foundation
 
 var globals  = Globals( startTime: DispatchTime.now() )
-//globals.startTime = DispatchTime.now()
 
 let logQueue = DispatchQueue( label: "logQueue" )
 let threads  = DispatchGroup()
+let log = Logger()
 main()
-threads.wait()
+shutdown( successFlag: true )
 
 
 func main() {
-    processCommandLine( args: CommandLine.arguments )
-    let log = Logger()
+
     if( CommandLine.arguments.contains( "-vverbose" )) {
         globals.logLevel = Logger.Level.FINEST;
     }
-    globals.logLevel = Logger.Level.FINEST; //for the nonce
-    log.log ( msg: "Starting Jacobin VM", level: Logger.Level.FINE )
+    globals.logLevel = Logger.Level.FINEST; //for the nonce -- remove eventually
+    processCommandLine( args: CommandLine.arguments )
+    log.log ( msg: "starting Jacobin VM", level: Logger.Level.FINE )
 }
 
 func processCommandLine( args: [String]) {
-    if( args.count != 2 ) {
-        showUsage()
-    } else {
-        let name = CommandLine.arguments[1]
-        print( "hello \(name)" )
+    let cp = CommandLineProcessor()
+    cp.process(args: args)
+    if  cp.dispatch( commandLine: globals.commandLine ) == false {
+        shutdown( successFlag: true )
     }
+
+}
+
+/// shuts downt the JVM. If passed 'true' it's a normal shutdown, if 'false' this indicates an error was the cause
+func shutdown( successFlag : Bool ) {
+    threads.wait()
+    exit( successFlag ? 0 : -1 )
 }
 
 func showUsage() {

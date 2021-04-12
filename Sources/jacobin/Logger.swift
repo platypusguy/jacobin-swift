@@ -16,11 +16,12 @@ class Logger {
 
         func log( msg: String, level: Logger.Level ) {
             if level.rawValue <= globals.logLevel.rawValue {
-                let currTime = DispatchTime.now()
-                let elapsedMillis = ( currTime.uptimeNanoseconds - globals.startTime.uptimeNanoseconds ) / 1_000_000
-//                let elapsedSecs = Double(elapsedMillis) / 1000.0
                 logQueue.async( group: threads ) {
-                    print( "[\(elapsedMillis/1000).\(elapsedMillis%1000)s] \(msg)" )
+                    let currTime = DispatchTime.now()
+                    let elapsedMillis = ( currTime.uptimeNanoseconds - globals.startTime.uptimeNanoseconds ) / 1_000_000
+                    let s = String( format: "%0.03f", elapsedMillis/1000 )
+                    fputs( "[\(s)s] \(msg)\n", stderr )
+//                    print( "[\(elapsedMillis/1000).\(elapsedMillis%1000)s] \(msg)" )
                 }
             }
         }
