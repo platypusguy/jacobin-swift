@@ -9,6 +9,9 @@
 
 import Foundation
 
+
+enum Streams : Int { case sout = 1, serr = 2 }
+
 class Logger {
         enum Level :  Int {
             case SEVERE = 1, WARNING, CLASS, INFO, FINE, FINEST

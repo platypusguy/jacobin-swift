@@ -25,8 +25,8 @@ func main() {
         globals.logLevel = Logger.Level.FINEST;
     }
     globals.logLevel = Logger.Level.FINEST; //for the nonce -- remove eventually
-    processCommandLine( args: CommandLine.arguments )
     log.log ( msg: "starting Jacobin VM", level: Logger.Level.FINE )
+    processCommandLine( args: CommandLine.arguments )
 }
 
 func processCommandLine( args: [String]) {
@@ -44,13 +44,24 @@ func shutdown( successFlag : Bool ) {
     exit( successFlag ? 0 : -1 )
 }
 
-func showUsage() {
-    print ( """
-            Usage: jacobin [arguments] class name [program parameters]
+func showUsage( stream:  Streams ) {
+    let outStream = stream ?? Streams.serr
 
-               where arguments can be:
-               -h             print this information
-               -version       show the jacobin version number
+    let usage =
+            """
+            Usage: jacobin [options] <mainclass> [args...]
+                      (to execute a class)
+                or jacobin [options] -jar <jarfile> [args...]
+                      (to execute a jar file)
+            Arguments following the main class, source file, -jar <jarfile>,
+            are passed as the arguments to main class.
 
-            """ )
+            where options include:
+
+                -? -h -help
+                              print this help message to the error stream
+                --help        print this help message to the output stream
+
+            """
+    fputs( usage + "\n", outStream == Streams.sout ? stdout : stderr )
 }

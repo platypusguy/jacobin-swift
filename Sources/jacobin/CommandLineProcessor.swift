@@ -46,7 +46,22 @@ class CommandLineProcessor {
     // parses the full command line into a table; dispatches basic commands (-help, -version, etc.)
     // returns true = continue processing, false = should exit (such as after showing -help or -version info)
     func dispatch( commandLine: String )-> Bool {
-        return( true ) // for the nonce TODO: resume here
+        let allArgs = commandLine.components(separatedBy: " ")
+
+        if allArgs.count < 2        ||
+           allArgs.contains( "?" )  ||
+           allArgs.contains( "=h" ) ||
+           allArgs.contains( "-help" )  {
+                showUsage( stream: Streams.serr );
+                return false
+        }
+        else
+        if allArgs.contains( "--help") {
+            showUsage( stream: Streams.sout )
+            return false
+        }
+
+        return( true ) // for the nonce TODO: resume here with version number and copyright (stored in globals)
 
     }
 }
