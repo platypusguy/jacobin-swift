@@ -13,5 +13,6 @@ struct Globals {
     var logLevel = Logger.Level.SEVERE
     var startTime: DispatchTime
     var commandLine: String = ""
+    let version = "0.1.0"
 }
 

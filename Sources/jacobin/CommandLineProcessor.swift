@@ -46,22 +46,51 @@ class CommandLineProcessor {
     // parses the full command line into a table; dispatches basic commands (-help, -version, etc.)
     // returns true = continue processing, false = should exit (such as after showing -help or -version info)
     func dispatch( commandLine: String )-> Bool {
-        let allArgs = commandLine.components(separatedBy: " ")
+        let allArgs = commandLine.components( separatedBy: " " )
 
+        //start by handling all the params that just show the user info and exit: -version, -help, errors, etc.
+        let result : Bool? = showUserMessagesAndExit( allArgs: allArgs )
+        if result != nil {
+            return result.unsafelyUnwrapped
+        }
+
+        return true
+    }
+
+    func showUserMessagesAndExit( allArgs: [String] ) -> Bool? {
         if allArgs.count < 2        ||
-           allArgs.contains( "?" )  ||
-           allArgs.contains( "=h" ) ||
-           allArgs.contains( "-help" )  {
-                showUsage( stream: Streams.serr );
-                return false
+                   allArgs.contains( "?" )  ||
+                   allArgs.contains( "=h" ) ||
+                   allArgs.contains( "-help" )  {
+            UserMsgs.showUsage( stream: Streams.serr );
+            return false
         }
         else
         if allArgs.contains( "--help") {
-            showUsage( stream: Streams.sout )
+            UserMsgs.showUsage( stream: Streams.sout )
             return false
         }
+        else
+        if allArgs.contains( "-version" ) {
+            UserMsgs.showVersion( stream: Streams.serr )
+            return false
+        }
+        else
+        if allArgs.contains( "--version" ) {
+            UserMsgs.showVersion( stream: Streams.sout )
+            return false
+        }
+        else
+        if allArgs.contains( "-showversion" ) {
+            UserMsgs.showVersion( stream: Streams.serr )
+            return true
+        }
+        else
+        if allArgs.contains( "--showversion" ) {
+            UserMsgs.showVersion( stream: Streams.sout )
+            return true
+        }
 
-        return( true ) // for the nonce TODO: resume here with version number and copyright (stored in globals)
-
+        return( nil )
     }
 }

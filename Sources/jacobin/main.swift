@@ -40,28 +40,9 @@ func processCommandLine( args: [String]) {
 
 /// shuts downt the JVM. If passed 'true' it's a normal shutdown, if 'false' this indicates an error was the cause
 func shutdown( successFlag : Bool ) {
+    log.log ( msg: "shutting down Jacobin VM", level: Logger.Level.FINE )
     threads.wait()
     exit( successFlag ? 0 : -1 )
 }
 
-func showUsage( stream:  Streams ) {
-    let outStream = stream ?? Streams.serr
 
-    let usage =
-            """
-            Usage: jacobin [options] <mainclass> [args...]
-                      (to execute a class)
-                or jacobin [options] -jar <jarfile> [args...]
-                      (to execute a jar file)
-            Arguments following the main class, source file, -jar <jarfile>,
-            are passed as the arguments to main class.
-
-            where options include:
-
-                -? -h -help
-                              print this help message to the error stream
-                --help        print this help message to the output stream
-
-            """
-    fputs( usage + "\n", outStream == Streams.sout ? stdout : stderr )
-}
