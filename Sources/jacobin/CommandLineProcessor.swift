@@ -67,6 +67,10 @@ class CommandLineProcessor {
             log.log( msg: "starting class: \(startingClass)", level: Logger.Level.FINE )
         }
 
+        //at this point we know the starting class, now get the rest of the args that are intended for
+        //the application, rather than for the JVM
+        var appArgs = getAppArgs( args: allArgs, start: startingClass);
+
         return execContinue
     }
 
@@ -76,7 +80,7 @@ class CommandLineProcessor {
         let startingClass = ""
         for arg in args {
 
-            if !( arg.starts(with: "-") ) { //first arg without a leading hyphen should be the class/jar to execute
+            if !( arg.starts(with: "-" )) { //first arg without a leading hyphen should be the class/jar to execute
                 if arg.hasSuffix( ".class") || arg.hasSuffix( ".jar" ) {
                    return( arg )
                 }
@@ -100,6 +104,10 @@ class CommandLineProcessor {
             UserMsgs.showUsage( stream: Streams.serr );
         }
         return( startingClass )
+    }
+
+    private  func getAppArgs( args : [String], start: String ) -> [String]{
+        return( args ) //TODO: get the args after the starting class, if any. Resume here.
     }
 
     // there are a multitude of JVM switches that just print some information (version number, help instructions, etc.)
