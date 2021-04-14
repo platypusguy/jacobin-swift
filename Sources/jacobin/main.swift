@@ -32,10 +32,9 @@ func main() {
 func processCommandLine( args: [String]) {
     let cp = CommandLineProcessor()
     cp.process(args: args)
-    if  cp.dispatch( commandLine: globals.commandLine ) == false {
+    if  cp.dispatch( commandLine: globals.commandLine ) == execStop {
         shutdown( successFlag: true )
     }
-
 }
 
 /// shuts downt the JVM. If passed 'true' it's a normal shutdown, if 'false' this indicates an error was the cause

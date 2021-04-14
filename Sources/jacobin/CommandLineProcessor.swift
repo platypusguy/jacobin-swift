@@ -9,6 +9,9 @@
 
 import Foundation
 
+let execStop = false
+let execContinue = true
+
 class CommandLineProcessor {
     func process( args: [String] ) {
         //in Swift, arg[0] is the name of the program (i.e., jacobin). we capture this.
@@ -63,32 +66,32 @@ class CommandLineProcessor {
                    allArgs.contains( "=h" ) ||
                    allArgs.contains( "-help" )  {
             UserMsgs.showUsage( stream: Streams.serr );
-            return false
+            return execStop
         }
         else
         if allArgs.contains( "--help") {
             UserMsgs.showUsage( stream: Streams.sout )
-            return false
+            return execStop
         }
         else
         if allArgs.contains( "-version" ) {
             UserMsgs.showVersion( stream: Streams.serr )
-            return false
+            return execStop
         }
         else
         if allArgs.contains( "--version" ) {
             UserMsgs.showVersion( stream: Streams.sout )
-            return false
+            return execStop
         }
         else
         if allArgs.contains( "-showversion" ) {
             UserMsgs.showVersion( stream: Streams.serr )
-            return true
+            return execContinue
         }
         else
         if allArgs.contains( "--showversion" ) {
             UserMsgs.showVersion( stream: Streams.sout )
-            return true
+            return execContinue
         }
 
         return( nil )
