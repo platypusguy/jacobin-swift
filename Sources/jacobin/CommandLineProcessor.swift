@@ -49,21 +49,67 @@ class CommandLineProcessor {
     // parses the full command line into a table; dispatches basic commands (-help, -version, etc.)
     // returns true = continue processing, false = should exit (such as after showing -help or -version info)
     func dispatch( commandLine: String )-> Bool {
-        let allArgs = commandLine.components( separatedBy: " " )
+        var allArgs = commandLine.components( separatedBy: " " )
 
         //start by handling all the params that just show the user info and exit: -version, -help, errors, etc.
-        let result : Bool? = showUserMessagesAndExit( allArgs: allArgs )
+        let result : Bool? = handleUserMessages( allArgs: allArgs )
         if result != nil {
             return result.unsafelyUnwrapped
         }
 
-        return true
+        _ = allArgs.removeFirst() // get rid of the call to jacobin
+        //next get all the switches/params intended for the JVM, rather than the app
+        let startingClass = dispatchJVMParams( args: allArgs )
+        if( startingClass.isEmpty ) {
+            return execStop // if startingClass is empty, an error occurred and the error msg has already been shown
+        }
+        else {
+            log.log( msg: "starting class: \(startingClass)", level: Logger.Level.FINE )
+        }
+
+        return execContinue
     }
 
-    func showUserMessagesAndExit( allArgs: [String] ) -> Bool? {
+    //goes through the command-line switches and parameters that precede the name of the class/jar to execute
+    //he settings they specify. Returns the name of the class/jar to execute.
+    func dispatchJVMParams( args: [String] ) -> String {
+        let startingClass = ""
+        for arg in args {
+
+            if !( arg.starts(with: "-") ) { //first arg without a leading hyphen should be the class/jar to execute
+                if arg.hasSuffix( ".class") || arg.hasSuffix( ".jar" ) {
+                   return( arg )
+                }
+                else {
+                    unrecognizedOptionMsg( option: arg )
+                    return ""
+                }
+            }
+
+            //handle all args/params that start with one or more hyphens
+            switch arg {
+            case "-h", "-help", "--help", "-showversion", "-version", "--version":
+                // these were previously processed, so skip over them
+                continue;
+            default:
+                fputs( "Parameter \(arg) not supported. Ignored.\n", stderr )
+            }
+        }
+
+        if startingClass.isEmpty {
+            UserMsgs.showUsage( stream: Streams.serr );
+        }
+        return( startingClass )
+    }
+
+    // there are a multitude of JVM switches that just print some information (version number, help instructions, etc.)
+    // for the user on the console. If they appear on the command line, they are executed (below) and in most cases,
+    // all other items are ignored and the program then exits. Where the other switches are *not* ignored, they return
+    // execContine in the code below.
+    func handleUserMessages( allArgs: [String] ) -> Bool? {
         if allArgs.count < 2        ||
                    allArgs.contains( "?" )  ||
-                   allArgs.contains( "=h" ) ||
+                   allArgs.contains( "-h" ) ||
                    allArgs.contains( "-help" )  {
             UserMsgs.showUsage( stream: Streams.serr );
             return execStop
@@ -95,5 +141,14 @@ class CommandLineProcessor {
         }
 
         return( nil )
+    }
+
+    // shows the fatal error message arising from an invalid, that is, unrecognized, option on the command line
+    private func unrecognizedOptionMsg( option: String ) {
+        fputs( "Unrecognized option: \(option)\n", stderr )
+        fputs( """
+               Error: Could not create the Java Virtual Machine.
+               Error: A fatal exception has occurred. Program will exit.
+               """ + "\n", stderr )
     }
 }

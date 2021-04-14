@@ -31,7 +31,7 @@ func main() {
 
 func processCommandLine( args: [String]) {
     let cp = CommandLineProcessor()
-    cp.process(args: args)
+    cp.process( args: args )
     if  cp.dispatch( commandLine: globals.commandLine ) == execStop {
         shutdown( successFlag: true )
     }
