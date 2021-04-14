@@ -14,8 +14,6 @@ class UserMsgs {
     // shows the usage (switches and params) to the user, in response to error or command-line 'help' request
     // input Streams identifies whether message is shown to stdout or stderr
     static func showUsage( stream:  Streams ) {
-        let outStream = stream ?? Streams.serr
-
         let usage =
                 """
                 Usage: jacobin [options] <mainclass> [args...]
@@ -38,18 +36,17 @@ class UserMsgs {
 
 
                 """
-        fputs( usage + "\n", outStream == Streams.sout ? stdout : stderr )
+        fputs( usage + "\n", stream == Streams.sout ? stdout : stderr )
     }
 
     // shows the version number of this instance of Jacobin JVM
     // input Streams identifies whether message is shown to stdout or stderr
     static func showVersion( stream: Streams ) {
-        let outStream = stream ?? Streams.serr
         let version =
                 """
                 jacobin JVM v. \(globals.version) 2021
                 64-bit server JVM
                 """
-        fputs( version + "\n", outStream == Streams.sout ? stdout : stderr )
+        fputs( version + "\n", stream == Streams.sout ? stdout : stderr )
     }
 }
