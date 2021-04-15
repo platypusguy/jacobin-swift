@@ -57,7 +57,7 @@ class CommandLineProcessor {
             return result.unsafelyUnwrapped
         }
 
-        _ = allArgs.removeFirst() // get rid of the call to jacobin
+        _ = allArgs.removeFirst() // get rid of the invocation of jacobin
         //next get all the switches/params intended for the JVM, rather than the app
         let startingClass = dispatchJVMParams( args: allArgs )
         if( startingClass.isEmpty ) {
@@ -69,7 +69,10 @@ class CommandLineProcessor {
 
         //at this point we know the starting class, now get the rest of the args that are intended for
         //the application, rather than for the JVM
-        var appArgs = getAppArgs( args: allArgs, start: startingClass);
+        let appArgs = getAppArgs( args: allArgs, start: startingClass);
+        globals.appArgs = appArgs
+
+        log.log( msg: "App args: \(appArgs.joined( separator:" " ))", level: Logger.Level.FINE )
 
         return execContinue
     }
@@ -106,8 +109,29 @@ class CommandLineProcessor {
         return( startingClass )
     }
 
+    // loops through the command-line args, when it matches the starting .class file, it then puts all
+    // subsequent args into a string array of application args, which is returned.
     private  func getAppArgs( args : [String], start: String ) -> [String]{
-        return( args ) //TODO: get the args after the starting class, if any. Resume here.
+        var appArgs: [String] = [""]
+        var inAppArgs = false
+
+        for arg in args  {
+            if arg == start {
+                inAppArgs = true
+                continue
+            }
+            if inAppArgs == false { // if we're not at the starting point yet, keep scanning
+                continue
+            }
+            else {
+                appArgs.append( arg )
+            }
+        }
+
+        if appArgs.count > 1 { // if there is at least one arg, drop the intial "" that appArgs was initialized with
+            appArgs = Array( appArgs.dropFirst() )
+        }
+        return( appArgs )
     }
 
     // there are a multitude of JVM switches that just print some information (version number, help instructions, etc.)

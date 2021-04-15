@@ -10,9 +10,10 @@
 import Foundation
 
 struct Globals {
-    var logLevel = Logger.Level.SEVERE
+    var logLevel = Logger.Level.WARNING
     var startTime: DispatchTime
     var commandLine: String = ""
+    var appArgs: [String] = [""]
     let version = "0.1.0"
 }
 
