@@ -22,9 +22,10 @@ class Logger {
                 logQueue.async( group: threads ) {
                     let currTime = DispatchTime.now()
                     let elapsedMillis = ( currTime.uptimeNanoseconds - globals.startTime.uptimeNanoseconds ) / 1_000_000
-                    let s = String( format: "%0.03f", elapsedMillis/1000 )
-                    fputs( "[\(s)s] \(msg)\n", stderr )
-//                    print( "[\(elapsedMillis/1000).\(elapsedMillis%1000)s] \(msg)" )
+//                    fputs( "[\(elapsedMillis)ms] \(msg)\n", stderr )
+                    fputs( "[\(elapsedMillis/1000).", stderr )
+                    let s = String( format: "%0.03d", elapsedMillis%1000 )
+                    fputs( "\(s)s] \(msg)\n", stderr )
                 }
             }
         }
