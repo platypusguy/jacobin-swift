@@ -34,7 +34,8 @@ class CommandLineProcessor {
             commandLine += jdkOptions + " "
         }
 
-        // after adding all the options specified in the environment variables, we add the user-specified parameters
+        // after adding all the options specified in the environment variables, add the parameters that
+        // were specified on the command line by the user
         if args.count > 1 {
             for index in 1...args.count - 1 {
                 commandLine += args[index] + " "
