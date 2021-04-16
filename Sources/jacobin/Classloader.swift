@@ -39,9 +39,11 @@ class Classloader {
             }
 
             //check that the file version is not above JDK 11 (that is, 55)
-            let version = Int(( klass.rawBytes[6] * 256 ) + klass.rawBytes[7] )
+            let version = Int( Int16( klass.rawBytes[6]) * 256 ) + Int(klass.rawBytes[7])
             if version > 55 {
-                log.log( msg: "Error: this version of Jacobin supports only Java classes at or below Java 11. Exiting.")
+                log.log(
+                    msg: "Error: this version of Jacobin supports only Java classes at or below Java 11. Exiting.",
+                    level: Logger.Level.SEVERE )
                 shutdown(successFlag: false)
             }
             else {
@@ -56,7 +58,7 @@ class Classloader {
             log.log(msg: "Error reading file: \(name). Exiting", level: Logger.Level.SEVERE)
             shutdown( successFlag: false )
         }
-//CURR: resume here
+//CURR: add exception for invalid version number and for error reading class file. Add parent CL field to these CLs.
     }
 }
 
