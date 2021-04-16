@@ -64,6 +64,7 @@ class CommandLineProcessor {
         if ( startingClass.isEmpty ) {
             return execStop // if startingClass is empty, an error occurred and the error msg has already been shown
         } else {
+            globals.startingClass = startingClass
             log.log( msg: "starting class: \(startingClass)", level: Logger.Level.FINE )
         }
 

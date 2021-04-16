@@ -2,7 +2,7 @@
  * jacobin - JVM written in Swift
  *
  * Copyright (c) 2021 Andrew Binstock. All rights reserved.
- * Licensed under Mozilla Public  License, v. 2.0. http://mozilla.org/MPL/2.0/.
+ * Licensed under Mozilla Public License, v. 2.0. http://mozilla.org/MPL/2.0/.
  */
 
 /// main line of jacobin
@@ -27,8 +27,16 @@ func main() {
     globals.logLevel = Logger.Level.FINEST; //for the nonce -- remove eventually
     log.log ( msg: "starting Jacobin VM", level: Logger.Level.FINE )
     processCommandLine( args: CommandLine.arguments )
+    loadClasses( startingClass: globals.startingClass )
 }
 
+func loadClasses( startingClass: String ) {
+    globals.bootstrapLoader.setName( name: "boot" )
+    globals.systemLoader.setName( name: "system" )
+    globals.systemLoader.load( name: startingClass )
+}
+
+// parse the command line and capture all the various settings it specifies.
 func processCommandLine( args: [String]) {
     let cp = CommandLineProcessor()
     cp.process( args: args )
