@@ -72,6 +72,10 @@ class Classloader {
                 klass.constantPoolCount = cpCount
             }
 
+            // load the constant pool
+            loadConstantPool( klass: klass )
+            print( "class \(name) constant pool has: \(klass.cp.count) entries")
+
         } catch JVMerror.ClassFormatError( name: name ) {
             log.log( msg: "ClassFormat error in: \(name). Exiting", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
@@ -80,8 +84,36 @@ class Classloader {
             log.log( msg: "Error reading file: \(name). Exiting", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
-//CURR: add exception for invalid version number and for error reading class file.
+        //Eventually: add exception for invalid version number and for error reading class file.
     }
+
+    func loadConstantPool( klass: LoadedClass ) {
+        var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
+        let cpe = CpEntry()
+        klass.cp.append( cpe ) // entry[0] is never used
+        for n in 1...klass.constantPoolCount - 1 {
+            byteCounter += 1
+            let cpe = CpEntry()
+            cpe.type = Int(klass.rawBytes[byteCounter])
+            switch( cpe.type ) {
+                case 10: // method reference
+                    cpe.classIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                    cpe.nameAndTypeIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                    byteCounter += 4
+                    klass.cp.append( cpe )
+                    print( "Method reference: class index: \(cpe.classIndex) nameAndTypeIndex: \(cpe.nameAndTypeIndex)")
+                default: break //CURR: for testing only. should indicate a corrupted class file.
+            }
+        }
+    }
+
+    func getInt16fromBytes( msb: UInt8, lsb: UInt8 ) -> Int16 {
+        return( Int16(msb) * 256 ) + Int16( lsb )
+    }
+
+
 }
 
 enum classStatus  :  Int { case NOT_VERIFIED, PRELIM_VERIFIED, VERIFIED, LINKED, PREPARED }
@@ -93,4 +125,20 @@ class LoadedClass {
     var version = 0
     var constantPoolCount = 0
     var assertionStatus = globals.assertionStatus
+    var cp = [CpEntry]()
+}
+
+class CpEntry {
+    var type: Int = 0
+    var string: String = ""
+    var int: Int32 = 0
+    var float: Float = 0.0
+    var long: Int64 = 0
+    var double: Double = 0.0
+    var classIndex: Int16 = 0
+    var nameAndTypeIndex: Int16 = 0
+
+//    func CpEntry() -> CpEntry {
+//        type = 0; string = ""; int = 0; float = 0.0; long = 0; double = 0.0
+//    }
 }
