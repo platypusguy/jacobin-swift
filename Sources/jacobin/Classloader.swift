@@ -14,15 +14,32 @@ class Classloader {
     var parent = ""
     var cl : [String: LoadedClass] = [:]
 
-    func setName( name: String ) {
+    // create Classloader with name and pointing to parent. This doesn't look like idiomatic Swift. Should revisit.
+    func new( name: String, parent: String ) -> Classloader {
         self.name = name
+        self.parent = parent
+        return( self )
     }
+//
+//    func setName( name: String ) {
+//        self.name = name
+//    }
 
+    // load a class into the classloader, if it's not alread there
     func add( name: String, klass: LoadedClass ) {
-        cl[name] = klass;
+        if( cl[name] == nil ) {
+            cl[name] = klass;
+        }
     }
 
+    // reads in a class, parses it, creates a loadable class and loads it, provided the class is not
+    // already in the classloader
     func load( name: String ) {
+
+        if cl[name] != nil { // if the class is already in the loader, return
+            return
+        }
+
         let fileURL = URL( string: "file:" + name )!
         do {
             let data = try? Data( contentsOf: fileURL, options: [.uncached] )
@@ -35,7 +52,6 @@ class Classloader {
                klass.rawBytes[2] != 0xBA || klass.rawBytes[3] != 0xBE {
                     throw JVMerror.ClassFormatError( name: name )
 //               log.log(msg: "Invalid class format in \(name). Exiting", level: Logger.Level.SEVERE )
-               shutdown( successFlag: false )
             }
 
             //check that the file version is not above JDK 11 (that is, 55)
@@ -53,12 +69,13 @@ class Classloader {
 
         } catch JVMerror.ClassFormatError( name: name ) {
             log.log( msg: "ClassFormat error in: \(name). Exiting", level: Logger.Level.SEVERE )
-        }
-        catch {
-            log.log(msg: "Error reading file: \(name). Exiting", level: Logger.Level.SEVERE)
             shutdown( successFlag: false )
         }
-//CURR: add exception for invalid version number and for error reading class file. Add parent CL field to these CLs.
+        catch {
+            log.log( msg: "Error reading file: \(name). Exiting", level: Logger.Level.SEVERE )
+            shutdown( successFlag: false )
+        }
+//CURR: add exception for invalid version number and for error reading class file.
     }
 }
 

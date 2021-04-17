@@ -20,8 +20,8 @@ struct Globals {
     var appArgs: [String] = [""]
 
     // ---- classloading items ----
-    var bootstrapLoader = Classloader()
-    var systemLoader    = Classloader()
+    var bootstrapLoader = Classloader().new( name: "bootstrap", parent: "" )
+    var systemLoader    = Classloader().new( name: "system", parent: "bootstrap" )
 
     // ---- version info -----
     let version = "0.1.0"
