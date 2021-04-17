@@ -20,12 +20,8 @@ class Classloader {
         self.parent = parent
         return( self )
     }
-//
-//    func setName( name: String ) {
-//        self.name = name
-//    }
 
-    // load a class into the classloader, if it's not alread there
+    // load a class into the classloader, if it's not already there
     func add( name: String, klass: LoadedClass ) {
         if( cl[name] == nil ) {
             cl[name] = klass;
@@ -51,11 +47,10 @@ class Classloader {
             if klass.rawBytes[0] != 0xCA || klass.rawBytes[1] != 0xFE ||
                klass.rawBytes[2] != 0xBA || klass.rawBytes[3] != 0xBE {
                     throw JVMerror.ClassFormatError( name: name )
-//               log.log(msg: "Invalid class format in \(name). Exiting", level: Logger.Level.SEVERE )
             }
 
             //check that the file version is not above JDK 11 (that is, 55)
-            let version = Int( Int16( klass.rawBytes[6]) * 256 ) + Int(klass.rawBytes[7])
+            let version = Int( Int16( klass.rawBytes[6]) * 256 ) + Int(klass.rawBytes[7] )
             if version > 55 {
                 log.log(
                     msg: "Error: this version of Jacobin supports only Java classes at or below Java 11. Exiting.",
@@ -65,6 +60,16 @@ class Classloader {
             else {
                 klass.version = version;
                 klass.status = classStatus.PRELIM_VERIFIED
+            }
+
+            // get the constant pool count
+            let cpCount : Int = Int( Int16( klass.rawBytes[8]) * 256 ) + Int(klass.rawBytes[9] )
+            if cpCount < 2  {
+                throw JVMerror.ClassFormatError(name: name + " constant pool count." )
+            }
+            else {
+                print( "class \(name) constant pool count: \(cpCount)" )
+                klass.constantPoolCount = cpCount
             }
 
         } catch JVMerror.ClassFormatError( name: name ) {
@@ -86,4 +91,6 @@ class LoadedClass {
     var status = classStatus.NOT_VERIFIED
     var rawBytes = [UInt8]()
     var version = 0
+    var constantPoolCount = 0
+    var assertionStatus = globals.assertionStatus
 }

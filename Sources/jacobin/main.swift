@@ -30,9 +30,8 @@ func main() {
     loadClasses( startingClass: globals.startingClass )
 }
 
+// load classes starting with the main class of the app
 func loadClasses( startingClass: String ) {
-    globals.bootstrapLoader.setName( name: "boot" )
-    globals.systemLoader.setName( name: "system" )
     globals.systemLoader.load( name: startingClass )
 }
 

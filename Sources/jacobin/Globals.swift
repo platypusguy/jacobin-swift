@@ -22,6 +22,7 @@ struct Globals {
     // ---- classloading items ----
     var bootstrapLoader = Classloader().new( name: "bootstrap", parent: "" )
     var systemLoader    = Classloader().new( name: "system", parent: "bootstrap" )
+    var assertionStatus = true //default assertion status is that assertions are executed. This is only for start-up.
 
     // ---- version info -----
     let version = "0.1.0"
