@@ -77,24 +77,20 @@ class Classloader {
             print( "class \(name) constant pool has: \(klass.cp.count) entries")
 
             // validate the constant pool
-            try validateConstantPool( klass: klass )
+            validateConstantPool( klass: klass, klassName: name )
 
         } catch JVMerror.ClassFormatError( name: name ) {
             log.log( msg: "ClassFormat error in: \(name). Exiting", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
-        catch JVMerror.ClassVerificationError( name: name ) {
-            log.log( msg: "Class verification error in: \(name). Exiting", level: Logger.Level.SEVERE )
-            shutdown( successFlag: false )
-        }
         catch {
-            log.log( msg: "Error reading file: \(name). Exiting", level: Logger.Level.SEVERE )
+            log.log( msg: "Error reading file: \(name) Exiting", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
         //Eventually: add exception for invalid version number and for error reading class file.
     }
 
-    // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
+        // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
     // This method parses through them and creates an array of parsed entries in the class being loaded. The entries in
     // the array inherit from cpEntryTemplate. Note that the first entry in all constant pools is non-existent, which I
     // believe was done to avoid off-by-one errors in lookups, but not sure. This is why the loop through entries begins
@@ -176,21 +172,50 @@ class Classloader {
     }
 
     // make sure all the pointers point to the correct items and that values are within the right range
-    func validateConstantPool( klass: LoadedClass ) throws {
+    func validateConstantPool( klass: LoadedClass, klassName: String ) {
         for n in 1...klass.constantPoolCount-1 {
             switch( klass.cp[n].type ) {
             case 1: //UTF8 string
-                var currTemp: CpEntryTemplate = klass.cp[n]
-                var currEntry: CpEntryUTF8 = currTemp as! CpEntryUTF8
+                let currTemp: CpEntryTemplate = klass.cp[n]
+                let currEntry: CpEntryUTF8 = currTemp as! CpEntryUTF8
                 let UTF8string = currEntry.string
-                if UTF8string.contains( Character(UnicodeScalar(0))) {
-                    throw JVMerror.ClassVerificationError(name: "verifying constant pool" ) //CURR: Continue here
+                if UTF8string.contains( Character(UnicodeScalar(0x00))) || //Ox00 and OxF0 through 0xFF are disallowed
+                   UTF8string.contains( Character(UnicodeScalar(0xF0))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF1))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF2))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF3))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF4))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF5))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF6))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF7))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF8))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xF9))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xFA))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xFB))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xFC))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xFD))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xFE))) ||
+                   UTF8string.contains( Character(UnicodeScalar(0xFF))) {
+                    log.log( msg: "Error validating constant pool in class \(klassName ) Exiting.",
+                             level: Logger.Level.SEVERE )
                 }
+
+            case 8: // constant string (must point to a UTF8 string)
+                let currTemp: CpEntryTemplate = klass.cp[n]
+                let currEntry: CpEntryStringRef = currTemp as! CpEntryStringRef
+                let index = currEntry.stringIndex
+                let pointedToEntry = klass.cp[index]
+                if pointedToEntry.type != 1 {
+                    log.log( msg: "Error validating constant pool in class \(klassName ) Exiting.",
+                            level: Logger.Level.SEVERE )
+                }
+
             default: continue // for the nonce, eventually should be an error.
             }
         }
     }
 
+    // syntactic sugar for converting two succeeding bytes into an integer
     func getInt16fromBytes( msb: UInt8, lsb: UInt8 ) -> Int16 {
         return( Int16(msb) * 256 ) + Int16( lsb )
     }
@@ -246,11 +271,11 @@ class CpEntryFieldRef: CpEntryMethodRef {
 }
 
 class CpEntryStringRef: CpEntryTemplate {
-    var stringIndex: Int16 = 0
+    var stringIndex = 0
 
     init( index: Int16 ) {
         super.init( type: 8 )
-        stringIndex = index
+        stringIndex = Int( index )
     }
 }
 
