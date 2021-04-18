@@ -91,22 +91,30 @@ class Classloader {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
         let cpe = CpEntryTemplate()
         klass.cp.append( cpe ) // entry[0] is never used
-        for n in 1...klass.constantPoolCount - 1 {
+        for _ in 1...klass.constantPoolCount - 1 {
             byteCounter += 1
-            let cpe = CpEntry()
-            cpe.type = Int(klass.rawBytes[byteCounter])
-            switch( cpe.type ) {
-                case 10: // method reference
-                    cpe.classIndex =
+            let cpeType = Int(klass.rawBytes[byteCounter])
+            switch( cpeType ) {
+                case  9: // field reference
+                    let classIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
-                    cpe.nameAndTypeIndex =
+                    let nameAndTypeIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
                     byteCounter += 4
-//                    klass.cp.append( cpe )
-                    let methodRef : CpEntryMethodRef = CpEntryMethodRef( classIndex: cpe.classIndex,
-                                                                         nameAndTypeIndex: cpe.nameAndTypeIndex );
+                    let fieldRef : CpEntryFieldRef = CpEntryFieldRef( classIndex: classIndex,
+                            nameAndTypeIndex: nameAndTypeIndex );
+                    klass.cp.append( fieldRef )
+                    print( "Field reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)")
+                case 10: // method reference
+                    let classIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                    let nameAndTypeIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                    byteCounter += 4
+                    let methodRef : CpEntryMethodRef = CpEntryMethodRef( classIndex: classIndex,
+                                                                         nameAndTypeIndex: nameAndTypeIndex );
                     klass.cp.append( methodRef )
-                    print( "Method reference: class index: \(cpe.classIndex) nameAndTypeIndex: \(cpe.nameAndTypeIndex)")
+                    print( "Method reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)")
                 default: break //CURR: for testing only. should indicate a corrupted class file.
             }
         }
@@ -144,16 +152,29 @@ class CpEntryMethodRef: CpEntryTemplate {
         self.classIndex = classIndex
         self.nameAndTypeIndex = nameAndTypeIndex
     }
+    init( type: Int ) {
+        super.init()
+        self.type = type
+    }
 }
 
-class CpEntry {
-    var type: Int = 0
-    var string: String = ""
-    var int: Int32 = 0
-    var float: Float = 0.0
-    var long: Int64 = 0
-    var double: Double = 0.0
-    var classIndex: Int16 = 0
-    var nameAndTypeIndex: Int16 = 0
-
+class CpEntryFieldRef: CpEntryMethodRef {
+    override init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
+        super.init( type: 9 )
+//        type = 9
+        self.classIndex = classIndex
+        self.nameAndTypeIndex = nameAndTypeIndex
+    }
 }
+
+//class CpEntry {
+//    var type: Int = 0
+//    var string: String = ""
+//    var int: Int32 = 0
+//    var float: Float = 0.0
+//    var long: Int64 = 0
+//    var double: Double = 0.0
+//    var classIndex: Int16 = 0
+//    var nameAndTypeIndex: Int16 = 0
+//
+//}
