@@ -89,7 +89,7 @@ class Classloader {
 
     func loadConstantPool( klass: LoadedClass ) {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
-        let cpe = CpEntry()
+        let cpe = CpEntryTemplate()
         klass.cp.append( cpe ) // entry[0] is never used
         for n in 1...klass.constantPoolCount - 1 {
             byteCounter += 1
@@ -102,7 +102,10 @@ class Classloader {
                     cpe.nameAndTypeIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
                     byteCounter += 4
-                    klass.cp.append( cpe )
+//                    klass.cp.append( cpe )
+                    let methodRef : CpEntryMethodRef = CpEntryMethodRef( classIndex: cpe.classIndex,
+                                                                         nameAndTypeIndex: cpe.nameAndTypeIndex );
+                    klass.cp.append( methodRef )
                     print( "Method reference: class index: \(cpe.classIndex) nameAndTypeIndex: \(cpe.nameAndTypeIndex)")
                 default: break //CURR: for testing only. should indicate a corrupted class file.
             }
@@ -125,7 +128,22 @@ class LoadedClass {
     var version = 0
     var constantPoolCount = 0
     var assertionStatus = globals.assertionStatus
-    var cp = [CpEntry]()
+    var cp = [CpEntryTemplate]()
+}
+
+class CpEntryTemplate {
+    var type: Int = 0
+}
+
+class CpEntryMethodRef: CpEntryTemplate {
+    var classIndex: Int16 = 0
+    var nameAndTypeIndex: Int16 = 0
+    init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
+        super.init()
+        type = 10
+        self.classIndex = classIndex
+        self.nameAndTypeIndex = nameAndTypeIndex
+    }
 }
 
 class CpEntry {
@@ -138,7 +156,4 @@ class CpEntry {
     var classIndex: Int16 = 0
     var nameAndTypeIndex: Int16 = 0
 
-//    func CpEntry() -> CpEntry {
-//        type = 0; string = ""; int = 0; float = 0.0; long = 0; double = 0.0
-//    }
 }
