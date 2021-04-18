@@ -73,11 +73,18 @@ class Classloader {
             }
 
             // load the constant pool
-            loadConstantPool( klass: klass )
+            var location: Int = loadConstantPool( klass: klass )
             print( "class \(name) constant pool has: \(klass.cp.count) entries")
+
+            // validate the constant pool
+            try validateConstantPool( klass: klass )
 
         } catch JVMerror.ClassFormatError( name: name ) {
             log.log( msg: "ClassFormat error in: \(name). Exiting", level: Logger.Level.SEVERE )
+            shutdown( successFlag: false )
+        }
+        catch JVMerror.ClassVerificationError( name: name ) {
+            log.log( msg: "Class verification error in: \(name). Exiting", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
         catch {
@@ -93,9 +100,11 @@ class Classloader {
     // believe was done to avoid off-by-one errors in lookups, but not sure. This is why the loop through entries begins
     // at 1, rather than 0.
     //
-    // Refer to: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4-140
+    // returns the byte number of the end of constant pool
     //
-    func loadConstantPool( klass: LoadedClass ) {
+    // Refer to: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4-140
+    // TODO: Adding the remaining entry types for the class constant pool
+    func loadConstantPool( klass: LoadedClass ) -> Int {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
         let cpe = CpEntryTemplate()
         klass.cp.append( cpe ) // entry[0] is never used
@@ -156,11 +165,28 @@ class Classloader {
                     let descriptorIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
                     byteCounter += 4
-                    var nameAndType : CpNameAndType =
-                            CpNameAndType( nameIdx: Int(nameIndex), descriptorIdx: Int(descriptorIndex ))
+                    let nameAndType : CpNameAndType =
+                            CpNameAndType( nameIdx: Int(nameIndex), descriptorIdx: Int(descriptorIndex))
                     klass.cp.append( nameAndType )
                     print( "Name and type info: name index: \(nameIndex) descriptorIndex: \(descriptorIndex)")
                 default: break
+            }
+        }
+        return byteCounter
+    }
+
+    // make sure all the pointers point to the correct items and that values are within the right range
+    func validateConstantPool( klass: LoadedClass ) throws {
+        for n in 1...klass.constantPoolCount-1 {
+            switch( klass.cp[n].type ) {
+            case 1: //UTF8 string
+                var currTemp: CpEntryTemplate = klass.cp[n]
+                var currEntry: CpEntryUTF8 = currTemp as! CpEntryUTF8
+                let UTF8string = currEntry.string
+                if UTF8string.contains( Character(UnicodeScalar(0))) {
+                    throw JVMerror.ClassVerificationError(name: "verifying constant pool" ) //CURR: Continue here
+                }
+            default: continue // for the nonce, eventually should be an error.
             }
         }
     }
@@ -168,8 +194,6 @@ class Classloader {
     func getInt16fromBytes( msb: UInt8, lsb: UInt8 ) -> Int16 {
         return( Int16(msb) * 256 ) + Int16( lsb )
     }
-
-
 }
 
 enum classStatus  :  Int { case NOT_VERIFIED, PRELIM_VERIFIED, VERIFIED, LINKED, PREPARED }
