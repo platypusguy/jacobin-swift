@@ -92,6 +92,9 @@ class Classloader {
     // the array inherit from cpEntryTemplate. Note that the first entry in all constant pools is non-existent, which I
     // believe was done to avoid off-by-one errors in lookups, but not sure. This is why the loop through entries begins
     // at 1, rather than 0.
+    //
+    // Refer to: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4-140
+    //
     func loadConstantPool( klass: LoadedClass ) {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
         let cpe = CpEntryTemplate()
@@ -100,13 +103,20 @@ class Classloader {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
             switch( cpeType ) {
+                case  7: // class reference
+                    let classNameIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                    let classNameRef = CpEntryClassRef( index: classNameIndex )
+                    klass.cp.append( classNameRef )
+                    byteCounter += 2
+                    print( "Class name reference: index: \( classNameIndex ) ")
                 case  8: // string reference
                     let stringIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                     let stringRef = CpEntryStringRef( index: stringIndex )
                     klass.cp.append( stringRef )
                     byteCounter += 2
-                    print( "Field reference: string index: \(stringIndex) ")
+                    print( "Stringreference: string index: \(stringIndex) ")
                 case  9: // field reference
                     let classIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -193,6 +203,15 @@ class CpEntryStringRef: CpEntryTemplate {
     init( index: Int16 ) {
         super.init( type: 8 )
         stringIndex = index
+    }
+}
+
+class CpEntryClassRef: CpEntryTemplate {
+    var classNameIndex: Int16 = 0;
+
+    init( index: Int16 ) {
+        super.init( type: 7 )
+        classNameIndex = index
     }
 }
 
