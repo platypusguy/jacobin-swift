@@ -150,7 +150,17 @@ class Classloader {
                                                                          nameAndTypeIndex: nameAndTypeIndex );
                     klass.cp.append( methodRef )
                     print( "Method reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)")
-                default: break //CURR: for testing only. should indicate a corrupted class file.
+                case 12: // name and type info
+                    let nameIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                    let descriptorIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                    byteCounter += 4
+                    var nameAndType : CpNameAndType =
+                            CpNameAndType( nameIdx: Int(nameIndex), descriptorIdx: Int(descriptorIndex ))
+                    klass.cp.append( nameAndType )
+                    print( "Name and type info: name index: \(nameIndex) descriptorIndex: \(descriptorIndex)")
+                default: break
             }
         }
     }
@@ -174,6 +184,7 @@ class LoadedClass {
     var cp = [CpEntryTemplate]()
 }
 
+// ==== the classes for each type of entry in the constant pool ====
 class CpEntryTemplate {
     var type: Int = 0
 
@@ -239,14 +250,14 @@ class CpEntryUTF8: CpEntryTemplate {
     }
 }
 
-//class CpEntry {
-//    var type: Int = 0
-//    var string: String = ""
-//    var int: Int32 = 0
-//    var float: Float = 0.0
-//    var long: Int64 = 0
-//    var double: Double = 0.0
-//    var classIndex: Int16 = 0
-//    var nameAndTypeIndex: Int16 = 0
-//
-//}
+class CpNameAndType: CpEntryTemplate {
+    var nameIndex = 0
+    var descriptorIndex = 0
+
+    init( nameIdx: Int, descriptorIdx: Int ) {
+        super.init( type: 12 )
+        nameIndex = nameIdx
+        descriptorIndex = descriptorIdx
+    }
+}
+
