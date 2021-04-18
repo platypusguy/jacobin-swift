@@ -87,6 +87,11 @@ class Classloader {
         //Eventually: add exception for invalid version number and for error reading class file.
     }
 
+    // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
+    // This method parses through them and creates an array of parsed entries in the class being loaded. The entries in
+    // the array inherit from cpEntryTemplate. Note that the first entry in all constant pools is non-existent, which I
+    // believe was done to avoid off-by-one errors in lookups, but not sure. This is why the loop through entries begins
+    // at 1, rather than 0.
     func loadConstantPool( klass: LoadedClass ) {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
         let cpe = CpEntryTemplate()
@@ -95,6 +100,13 @@ class Classloader {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
             switch( cpeType ) {
+                case  8: // string reference
+                    let stringIndex =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                    let stringRef = CpEntryStringRef( index: stringIndex )
+                    klass.cp.append( stringRef )
+                    byteCounter += 2
+                    print( "Field reference: string index: \(stringIndex) ")
                 case  9: // field reference
                     let classIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -141,29 +153,46 @@ class LoadedClass {
 
 class CpEntryTemplate {
     var type: Int = 0
+
+    init() {
+        type = 0
+    }
+
+    init( type: Int ) {
+        self.type = type
+    }
 }
 
 class CpEntryMethodRef: CpEntryTemplate {
     var classIndex: Int16 = 0
     var nameAndTypeIndex: Int16 = 0
+
     init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
-        super.init()
-        type = 10
+        super.init( type: 10 )
         self.classIndex = classIndex
         self.nameAndTypeIndex = nameAndTypeIndex
     }
-    init( type: Int ) {
-        super.init()
-        self.type = type
+
+    override init( type: Int ) {
+        super.init( type: type )
     }
 }
 
+// Field References store the same data as Method References, hence this class derives from CpEntryMethodRef
 class CpEntryFieldRef: CpEntryMethodRef {
     override init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
         super.init( type: 9 )
-//        type = 9
         self.classIndex = classIndex
         self.nameAndTypeIndex = nameAndTypeIndex
+    }
+}
+
+class CpEntryStringRef: CpEntryTemplate {
+    var stringIndex: Int16 = 0;
+
+    init( index: Int16 ) {
+        super.init( type: 8 )
+        stringIndex = index
     }
 }
 
