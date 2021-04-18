@@ -103,6 +103,19 @@ class Classloader {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
             switch( cpeType ) {
+                case  1: // UTF-8 string
+                    let length =
+                            getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                    byteCounter += 2
+                    var buffer = [UInt8]()
+                    for n in 0...Int(length-1)  {
+                        buffer.append(klass.rawBytes[byteCounter+n+1])
+                    }
+                    let UTF8string = String(bytes: buffer, encoding: String.Encoding.utf8 ) ?? ""
+                    let UTF8entry = CpEntryUTF8( contents: UTF8string )
+                    klass.cp.append( UTF8entry )
+                    byteCounter += Int(length)
+                    print( "UTF-8 string: \( UTF8string ) ")
                 case  7: // class reference
                     let classNameIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -116,7 +129,7 @@ class Classloader {
                     let stringRef = CpEntryStringRef( index: stringIndex )
                     klass.cp.append( stringRef )
                     byteCounter += 2
-                    print( "Stringreference: string index: \(stringIndex) ")
+                    print( "String reference: string index: \(stringIndex) ")
                 case  9: // field reference
                     let classIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -198,7 +211,7 @@ class CpEntryFieldRef: CpEntryMethodRef {
 }
 
 class CpEntryStringRef: CpEntryTemplate {
-    var stringIndex: Int16 = 0;
+    var stringIndex: Int16 = 0
 
     init( index: Int16 ) {
         super.init( type: 8 )
@@ -207,11 +220,22 @@ class CpEntryStringRef: CpEntryTemplate {
 }
 
 class CpEntryClassRef: CpEntryTemplate {
-    var classNameIndex: Int16 = 0;
+    var classNameIndex: Int16 = 0
 
     init( index: Int16 ) {
         super.init( type: 7 )
         classNameIndex = index
+    }
+}
+
+class CpEntryUTF8: CpEntryTemplate {
+    var length = 0
+    var string = ""
+
+    init( contents: String ) {
+        super.init( type: 1 )
+        string = contents
+        length = contents.count
     }
 }
 
