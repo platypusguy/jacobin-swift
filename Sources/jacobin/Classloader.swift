@@ -14,8 +14,8 @@ class Classloader {
     var parent = ""
     var cl : [String: LoadedClass] = [:]
 
-    // create Classloader with name and pointing to parent. This doesn't look like idiomatic Swift. Should revisit.
-    func new( name: String, parent: String ) -> Classloader {
+    // create Classloader with name and pointing to parent.
+    init( name: String, parent: String ) {
         self.name = name
         self.parent = parent
         return( self )
@@ -87,7 +87,7 @@ class Classloader {
             log.log( msg: "Error reading file: \(name) Exiting", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
-        //Eventually: add exception for invalid version number and for error reading class file.
+
     }
 
         // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
