@@ -121,6 +121,7 @@ class Classloader {
                     klass.cp.append( UTF8entry )
                     byteCounter += Int(length)
                     print( "UTF-8 string: \( UTF8string ) ")
+
                 case  7: // class reference
                     let classNameIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -128,6 +129,7 @@ class Classloader {
                     klass.cp.append( classNameRef )
                     byteCounter += 2
                     print( "Class name reference: index: \( classNameIndex ) ")
+
                 case  8: // string reference
                     let stringIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -135,6 +137,7 @@ class Classloader {
                     klass.cp.append( stringRef )
                     byteCounter += 2
                     print( "String reference: string index: \(stringIndex) ")
+
                 case  9: // field reference
                     let classIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -145,6 +148,7 @@ class Classloader {
                             nameAndTypeIndex: nameAndTypeIndex );
                     klass.cp.append( fieldRef )
                     print( "Field reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)")
+
                 case 10: // method reference
                     let classIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -155,6 +159,7 @@ class Classloader {
                                                                          nameAndTypeIndex: nameAndTypeIndex );
                     klass.cp.append( methodRef )
                     print( "Method reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)")
+
                 case 12: // name and type info
                     let nameIndex =
                             getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
@@ -165,6 +170,7 @@ class Classloader {
                             CpNameAndType( nameIdx: Int(nameIndex), descriptorIdx: Int(descriptorIndex))
                     klass.cp.append( nameAndType )
                     print( "Name and type info: name index: \(nameIndex) descriptorIndex: \(descriptorIndex)")
+
                 default: break
             }
         }
@@ -200,13 +206,35 @@ class Classloader {
                              level: Logger.Level.SEVERE )
                 }
 
-            case 8: // constant string (must point to a UTF8 string)
+            case 7: // class reference must point to UTF8 string
+                let currTemp: CpEntryTemplate = klass.cp[n]
+                let currEntry: CpEntryClassRef = currTemp as! CpEntryClassRef
+                let index = currEntry.classNameIndex
+                let pointedToEntry = klass.cp[index]
+                if pointedToEntry.type != 1 {
+                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                            level: Logger.Level.SEVERE )
+                }
+
+            case 8: // constant string must point to a UTF8 string
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let currEntry: CpEntryStringRef = currTemp as! CpEntryStringRef
                 let index = currEntry.stringIndex
                 let pointedToEntry = klass.cp[index]
                 if pointedToEntry.type != 1 {
                     log.log( msg: "Error validating constant pool in class \(klassName ) Exiting.",
+                            level: Logger.Level.SEVERE )
+                }
+
+            case 9: // field ref must point to a class and to a nameAndType
+                let currTemp: CpEntryTemplate = klass.cp[n]
+                let currEntry: CpEntryFieldRef = currTemp as! CpEntryFieldRef
+                let classIndex = currEntry.classIndex
+                let nameAndTypeIndex = currEntry.nameAndTypeIndex
+                let pointedToEntry = klass.cp[classIndex]
+                let pointedToField = klass.cp[nameAndTypeIndex]
+                if pointedToEntry.type != 7 || pointedToField.type != 12 {
+                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -247,13 +275,13 @@ class CpEntryTemplate {
 }
 
 class CpEntryMethodRef: CpEntryTemplate {
-    var classIndex: Int16 = 0
-    var nameAndTypeIndex: Int16 = 0
+    var classIndex = 0
+    var nameAndTypeIndex = 0
 
     init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
         super.init( type: 10 )
-        self.classIndex = classIndex
-        self.nameAndTypeIndex = nameAndTypeIndex
+        self.classIndex = Int(classIndex)
+        self.nameAndTypeIndex = Int(nameAndTypeIndex)
     }
 
     override init( type: Int ) {
@@ -265,8 +293,8 @@ class CpEntryMethodRef: CpEntryTemplate {
 class CpEntryFieldRef: CpEntryMethodRef {
     override init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
         super.init( type: 9 )
-        self.classIndex = classIndex
-        self.nameAndTypeIndex = nameAndTypeIndex
+        self.classIndex = Int(classIndex)
+        self.nameAndTypeIndex = Int(nameAndTypeIndex)
     }
 }
 
@@ -280,11 +308,11 @@ class CpEntryStringRef: CpEntryTemplate {
 }
 
 class CpEntryClassRef: CpEntryTemplate {
-    var classNameIndex: Int16 = 0
+    var classNameIndex = 0
 
     init( index: Int16 ) {
         super.init( type: 7 )
-        classNameIndex = index
+        classNameIndex = Int(index)
     }
 }
 
