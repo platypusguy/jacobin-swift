@@ -270,6 +270,22 @@ class Classloader {
                     }
                 }
 
+            case 12: // name and type info
+                let currTemp: CpEntryTemplate = klass.cp[n]
+                let nameAndTypEntry : CpNameAndType = currTemp as! CpNameAndType
+                let namePointer = nameAndTypEntry.nameIndex
+                var cpEntry = klass.cp[namePointer]
+                if cpEntry.type != 1 { //the name pointer must point to a UTF8 string
+                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                            level: Logger.Level.SEVERE )
+                }
+                let typePointer = nameAndTypEntry.descriptorIndex
+                cpEntry = klass.cp[typePointer]
+                if cpEntry.type != 1 { //the name pointer must point to a UTF8 string
+                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                            level: Logger.Level.SEVERE )
+                }
+
             default: continue // for the nonce, eventually should be an error.
             }
         }
