@@ -18,7 +18,6 @@ class Classloader {
     init( name: String, parent: String ) {
         self.name = name
         self.parent = parent
-        return( self )
     }
 
     // load a class into the classloader, if it's not already there
@@ -90,7 +89,7 @@ class Classloader {
 
     }
 
-        // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
+    // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
     // This method parses through them and creates an array of parsed entries in the class being loaded. The entries in
     // the array inherit from cpEntryTemplate. Note that the first entry in all constant pools is non-existent, which I
     // believe was done to avoid off-by-one errors in lookups, but not sure. This is why the loop through entries begins
@@ -238,6 +237,39 @@ class Classloader {
                             level: Logger.Level.SEVERE )
                 }
 
+            case 10: // method reference
+                let currTemp: CpEntryTemplate = klass.cp[n]
+                let currEntry: CpEntryMethodRef = currTemp as! CpEntryMethodRef
+                let classIndex = currEntry.classIndex
+                var pointedToEntry = klass.cp[classIndex]
+                if pointedToEntry.type != 7 { //method ref must point to a class reference
+                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                            level: Logger.Level.SEVERE )
+                }
+                let nameIndex = currEntry.nameAndTypeIndex
+                pointedToEntry = klass.cp[nameIndex]
+                if pointedToEntry.type != 12 { //method ref name index must point to a name and type entry
+                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                            level: Logger.Level.SEVERE )
+                }
+                else { // make sure the name and type entry's name is pointing to a correctly named method
+                    let nameAndTypEntry : CpNameAndType = pointedToEntry as! CpNameAndType
+                    let namePointer = nameAndTypEntry.nameIndex
+                    pointedToEntry = klass.cp[namePointer]
+                    if pointedToEntry.type != 1 { //the name must be a UTF8 string
+                        log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                                level: Logger.Level.SEVERE )
+                    }
+                    else { // if the name begins with a < it must only be <init>
+                        let utf8Entry : CpEntryUTF8 = pointedToEntry as! CpEntryUTF8
+                        let methodName = utf8Entry.string
+                        if methodName.starts(with: "<") && !( methodName.starts(with: "<init>")) {
+                            log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                                    level: Logger.Level.SEVERE )
+                        }
+                    }
+                }
+
             default: continue // for the nonce, eventually should be an error.
             }
         }
@@ -289,7 +321,8 @@ class CpEntryMethodRef: CpEntryTemplate {
     }
 }
 
-// Field References store the same data as Method References, hence this class derives from CpEntryMethodRef
+// Field References store the same data as Method References,
+//  hence this class derives from CpEntryMethodRef
 class CpEntryFieldRef: CpEntryMethodRef {
     override init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
         super.init( type: 9 )
