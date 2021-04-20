@@ -31,7 +31,7 @@ class Classloader {
     // already in the classloader
     func load( name: String ) {
 
-        if cl[name] != nil { // if the class is already in the loader, return
+        if cl[name] != nil { // if the class is already in the loader, return TODO: go up the chain of classloaders
             return
         }
 
@@ -67,16 +67,25 @@ class Classloader {
                 throw JVMerror.ClassFormatError(name: name + " constant pool count." )
             }
             else {
-                print( "class \(name) constant pool count: \(cpCount)" )
+            //    print( "class \(name) constant pool count: \(cpCount)" )
                 klass.constantPoolCount = cpCount
             }
 
             // load the constant pool
-            var location: Int = loadConstantPool( klass: klass )
+            var location: Int = loadConstantPool( klass: klass ) //location = index of last byte examined
             print( "class \(name) constant pool has: \(klass.cp.count) entries")
 
             // validate the constant pool
             validateConstantPool( klass: klass, klassName: name )
+
+            // load the access masks
+            let accessMask = getInt16fromBytes( msb: klass.rawBytes[location+1], lsb: klass.rawBytes[location+2] )
+            location += 2
+            let s = String( format: "%02X", accessMask )
+            print( "access mask: \(s)" )
+
+            //TODO: extract bits (https://medium.com/short-swift-stories/bitwise-shifting-and-operators-in-swift-c290180a665d)
+            //TODO: and validate with the logic here: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.1
 
         } catch JVMerror.ClassFormatError( name: name ) {
             log.log( msg: "ClassFormat error in: \(name). Exiting", level: Logger.Level.SEVERE )
