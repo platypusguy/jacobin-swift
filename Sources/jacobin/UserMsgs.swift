@@ -2,7 +2,7 @@
  * jacobin - JVM written in Swift
  *
  * Copyright (c) 2021 Andrew Binstock. All rights reserved.
- * Licensed under Mozilla Public  License, v. 2.0. http://mozilla.org/MPL/2.0/.
+ * Licensed under Mozilla Public License, v. 2.0. http://mozilla.org/MPL/2.0/.
  */
 
 /// Outputs most messages to users
