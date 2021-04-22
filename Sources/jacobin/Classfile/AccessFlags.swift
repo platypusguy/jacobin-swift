@@ -42,14 +42,34 @@ class AccessFlags {
         do {
             if klass.classIsInterface {
                 if klass.classIsAbstract == false ||
-                   klass.classIsSuper == true ||
-                   klass.classIsFinal == true ||
-                   klass.classIsEnum == true  ||
-                   klass.classIsModule == true {
+                   klass.classIsSuper    == true  ||
+                   klass.classIsFinal    == true  ||
+                   klass.classIsEnum     == true  ||
+                   klass.classIsModule   == true {
                        throw JVMerror.ClassVerificationError( name: klass.path )
                 }
             }
-            //CURR: resume here with remaining validation.
+
+            if klass.classIsInterface == false {
+                if klass.classIsAnnotation == true ||
+                   klass.classIsModule     == true {
+                       throw JVMerror.ClassVerificationError( name: klass.path )
+                }
+                else
+                if klass.classIsFinal    == true &&
+                   klass.classIsAbstract == true {
+                       throw JVMerror.ClassVerificationError( name: klass.path )
+                }
+            }
+
+            if klass.classIsAnnotation == true &&
+               klass.classIsInterface  == false {
+                       throw JVMerror.ClassVerificationError( name: klass.path )
+            }
+
+            if accessMask == 0 {
+                       throw JVMerror.ClassVerificationError( name: klass.path )
+            }
 
         }
         catch  {
