@@ -36,6 +36,7 @@ class UserMsgs {
 
 
                 """
+        threads.wait() // prevents logging info being partially overwritten by this
         fputs( usage + "\n", stream == Streams.sout ? stdout : stderr )
     }
 
@@ -47,6 +48,7 @@ class UserMsgs {
                 jacobin JVM v. \(globals.version) 2021
                 64-bit server JVM
                 """
+        threads.wait() // prevents logging info being partially overwritten by this
         fputs( version + "\n", stream == Streams.sout ? stdout : stderr )
     }
 }
