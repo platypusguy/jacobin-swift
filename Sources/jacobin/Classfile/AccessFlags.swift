@@ -7,15 +7,15 @@
 
 import Foundation
 
-/// handles extracting the class access flags from the class bytecode, processing it, and verifying it. Called from
-/// the classloader
+/// handles extracting the class access flags from the class bytecode, processing it, and verifying it.
+/// This class is called from the classloader
 
 class AccessFlags {
 
     // read the class access flags from the raw bytes of the class, here name klass
     // returns the access flags as a 16-bit integer
     static func readAccessFlags( klass: LoadedClass, location: Int ) -> Int16 {
-        let accessFlags = globals.systemLoader.getInt16fromBytes( msb: klass.rawBytes[location+1],
+        let accessFlags = Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
                                                                   lsb: klass.rawBytes[location+2] )
         return accessFlags
     }
