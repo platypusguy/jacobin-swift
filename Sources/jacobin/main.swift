@@ -15,24 +15,28 @@ var globals  = Globals( startTime: DispatchTime.now() )
 let logQueue = DispatchQueue( label: "logQueue" )
 let threads  = DispatchGroup()
 let log = Logger()
-main()
+try main()
 shutdown( successFlag: true )
 
 
-func main() {
-
-    if( CommandLine.arguments.contains( "-vverbose" )) {
-        globals.logLevel = Logger.Level.FINEST;
+func main() throws {
+    do {
+        if ( CommandLine.arguments.contains( "-vverbose" ) ) {
+            globals.logLevel = Logger.Level.FINEST;
+        }
+        globals.logLevel = Logger.Level.FINEST; //for the nonce -- remove eventually
+        log.log( msg: "starting Jacobin VM", level: Logger.Level.FINE )
+        processCommandLine( args: CommandLine.arguments )
+        try loadClasses( startingClass: globals.startingClass )
+    } catch {
+        log.log( msg: "Unexpected error in Jacobin VM. Exiting", level: Logger.Level.SEVERE )
+        shutdown( successFlag: false )
     }
-    globals.logLevel = Logger.Level.FINEST; //for the nonce -- remove eventually
-    log.log ( msg: "starting Jacobin VM", level: Logger.Level.FINE )
-    processCommandLine( args: CommandLine.arguments )
-    loadClasses( startingClass: globals.startingClass )
 }
 
 // load classes starting with the main class of the app
-func loadClasses( startingClass: String ) {
-    globals.systemLoader.load( name: startingClass )
+func loadClasses( startingClass: String ) throws {
+    try globals.systemLoader.load( name: startingClass )
 }
 
 // parse the command line and capture all the various settings it specifies.
