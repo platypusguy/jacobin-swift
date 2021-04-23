@@ -7,6 +7,7 @@
 import Foundation
 
 class ConstantPool {
+
     // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
     // This method parses through them and creates an array of parsed entries in the class being loaded. The entries in
     // the array inherit from cpEntryTemplate. Note that the first entry in all constant pools is non-existent, which I
@@ -25,7 +26,7 @@ class ConstantPool {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
             switch( cpeType ) {
-            case  1: // UTF-8 string
+            case 1: // UTF-8 string
                 let length =
                         Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 byteCounter += 2
@@ -39,7 +40,7 @@ class ConstantPool {
                 byteCounter += Int(length)
                 print( "UTF-8 string: \( UTF8string ) ")
 
-            case  7: // class reference
+            case Entry.ClassRef: // class reference
                 let classNameIndex =
                         Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let classNameRef = CpEntryClassRef( index: classNameIndex )
@@ -47,7 +48,7 @@ class ConstantPool {
                 byteCounter += 2
                 print( "Class name reference: index: \( classNameIndex ) ")
 
-            case  8: // string reference
+            case Entry.StringRef // string reference
                 let stringIndex =
                         Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let stringRef = CpEntryStringRef( index: stringIndex )

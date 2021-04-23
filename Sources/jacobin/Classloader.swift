@@ -73,7 +73,6 @@ class Classloader {
             if cpCount < 2 {
                 throw JVMerror.ClassFormatError( name: name + " constant pool count." )
             } else {
-                //    print( "class \(name) constant pool count: \(cpCount)" )
                 klass.constantPoolCount = cpCount
             }
 
@@ -88,10 +87,19 @@ class Classloader {
             AccessFlags.verify( accessMask: accessMask, klass: klass )
 
             location += 2
-            let s = String( format: "%02X", accessMask )
-            print( "access mask: \(s)" )
+            let s = String( format: "%02X", accessMask ); print( "access mask: \(s)" )
+
+            // get the pointer to this class
+            let thisClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+                                                                lsb: klass.rawBytes[location+2] ))
+            if( klass.cp[thisClassEntry].type != 7 ) { // must point to a class reference
+                throw JVMerror.ClassVerificationError( name: name )
+            }
+            location += 2
+            let t = String( format: "%02X", thisClassEntry ); print( "this class entry in cp: \(t)" )
+              //CURR: work on following fields.
         }
-        catch JVMerror.ClassFormatError(name: klass.path ) {
+        catch JVMerror.ClassFormatError( name: klass.path ) {
             log.log( msg: "ClassFormatError in \(name)", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
