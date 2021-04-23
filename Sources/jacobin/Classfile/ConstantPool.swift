@@ -40,7 +40,7 @@ class ConstantPool {
                 byteCounter += Int(length)
                 print( "UTF-8 string: \( UTF8string ) ")
 
-            case Entry.ClassRef: // class reference
+            case 7: // class reference
                 let classNameIndex =
                         Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let classNameRef = CpEntryClassRef( index: classNameIndex )
@@ -48,7 +48,7 @@ class ConstantPool {
                 byteCounter += 2
                 print( "Class name reference: index: \( classNameIndex ) ")
 
-            case Entry.StringRef // string reference
+            case 8: // string reference
                 let stringIndex =
                         Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let stringRef = CpEntryStringRef( index: stringIndex )
@@ -120,7 +120,7 @@ class ConstantPool {
                            UTF8string.contains( Character( UnicodeScalar( 0xFD ) ) ) ||
                            UTF8string.contains( Character( UnicodeScalar( 0xFE ) ) ) ||
                            UTF8string.contains( Character( UnicodeScalar( 0xFF ) ) ) {
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -130,7 +130,7 @@ class ConstantPool {
                 let index = currEntry.classNameIndex
                 let pointedToEntry = klass.cp[index]
                 if pointedToEntry.type != 1 {
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -140,7 +140,7 @@ class ConstantPool {
                 let index = currEntry.stringIndex
                 let pointedToEntry = klass.cp[index]
                 if pointedToEntry.type != 1 {
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -152,7 +152,7 @@ class ConstantPool {
                 let pointedToEntry = klass.cp[classIndex]
                 let pointedToField = klass.cp[nameAndTypeIndex]
                 if pointedToEntry.type != 7 || pointedToField.type != 12 {
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -162,26 +162,26 @@ class ConstantPool {
                 let classIndex = currEntry.classIndex
                 var pointedToEntry = klass.cp[classIndex]
                 if pointedToEntry.type != 7 { //method ref must point to a class reference
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
                 let nameIndex = currEntry.nameAndTypeIndex
                 pointedToEntry = klass.cp[nameIndex]
                 if pointedToEntry.type != 12 { //method ref name index must point to a name and type entry
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 } else { // make sure the name and type entry's name is pointing to a correctly named method
                     let nameAndTypEntry: CpNameAndType = pointedToEntry as! CpNameAndType
                     let namePointer = nameAndTypEntry.nameIndex
                     pointedToEntry = klass.cp[namePointer]
                     if pointedToEntry.type != 1 { //the name must be a UTF8 string
-                        log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                        jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                                 level: Logger.Level.SEVERE )
                     } else { // if the name begins with a < it must only be <init>
                         let utf8Entry: CpEntryUTF8 = pointedToEntry as! CpEntryUTF8
                         let methodName = utf8Entry.string
                         if methodName.starts( with: "<" ) && !( methodName.starts( with: "<init>" ) ) {
-                            log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                            jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                                     level: Logger.Level.SEVERE )
                         }
                     }
@@ -193,18 +193,24 @@ class ConstantPool {
                 let namePointer = nameAndTypEntry.nameIndex
                 var cpEntry = klass.cp[namePointer]
                 if cpEntry.type != 1 { //the name pointer must point to a UTF8 string
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
                 let typePointer = nameAndTypEntry.descriptorIndex
                 cpEntry = klass.cp[typePointer]
                 if cpEntry.type != 1 { //the name pointer must point to a UTF8 string
-                    log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
             default: continue // for the nonce, eventually should be an error.
             }
         }
+    }
+
+    // a quick statistical point if we're at the highest level of verbosity
+    static func log( klass: LoadedClass ) {
+        jacobin.log.log(msg: "Class: \( klass.path ) - constant pool has: \( klass.cp.count ) entries",
+                        level: Logger.Level.FINEST )
     }
 }

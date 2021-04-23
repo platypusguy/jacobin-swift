@@ -14,15 +14,16 @@ class AccessFlags {
 
     // read the class access flags from the raw bytes of the class, here name klass
     // returns the access flags as a 16-bit integer
-    static func readAccessFlags( klass: LoadedClass, location: Int ) -> Int16 {
+    static func readAccessFlags( klass: LoadedClass, location: Int ) {
         let accessFlags = Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
                                                                   lsb: klass.rawBytes[location+2] )
-        return accessFlags
+        klass.accessMask = Int( accessFlags )
     }
 
     // decode the meaning of the class access flags and set the various getters in the class
     // FromTable 4.1-B in the spec: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.1-200-E.1
-    static func processClassAccessMask( mask: Int16, klass: LoadedClass ) {
+    static func processClassAccessMask( klass: LoadedClass ) {
+        let mask = klass.accessMask
 
         if ( mask & 0x0001 ) > 0 { klass.classIsPublic =     true }
         if ( mask & 0x0010 ) > 0 { klass.classIsFinal      = true }
@@ -38,7 +39,7 @@ class AccessFlags {
 
     // verify the settings according to the requirements specified in the spec:
     // https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.1
-    static func verify( accessMask: Int16, klass: LoadedClass ) {
+    static func verify( klass: LoadedClass ) {
         do {
             if klass.classIsInterface {
                 if klass.classIsAbstract == false ||
@@ -67,15 +68,21 @@ class AccessFlags {
                        throw JVMerror.ClassVerificationError( name: klass.path )
             }
 
-            if accessMask == 0 {
+            if klass.accessMask == 0 {
                        throw JVMerror.ClassVerificationError( name: klass.path )
             }
 
         }
         catch  {
-            log.log( msg: "Class verification error in access masks of class \(klass.path)",
+            jacobin.log.log( msg: "Class verification error in access masks of class \(klass.path)",
                      level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
+    }
+
+    // log this if we're set at the most verbose level of detail
+    static func log( klass: LoadedClass ) {
+        let s = String( format: "%02X", klass.accessMask )
+        jacobin.log.log(msg: "Class: \(klass.path) - access mask: \(s)", level: Logger.Level.FINEST )
     }
 }

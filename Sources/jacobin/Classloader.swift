@@ -78,16 +78,15 @@ class Classloader {
 
             // load and verify the constant pool
             var location: Int = ConstantPool.load( klass: klass ) //location = index of last byte examined
-            print( "class \(name) constant pool has: \(klass.cp.count) entries" )
             ConstantPool.verify( klass: klass, klassName: name )
+            ConstantPool.log( klass: klass )
 
             // load and verify the class access masks
-            let accessMask = AccessFlags.readAccessFlags( klass: klass, location: location )
-            AccessFlags.processClassAccessMask( mask: accessMask, klass: klass )
-            AccessFlags.verify( accessMask: accessMask, klass: klass )
-
+            AccessFlags.readAccessFlags( klass: klass, location: location )
+            AccessFlags.processClassAccessMask( klass: klass )
+            AccessFlags.verify( klass: klass )
+            AccessFlags.log( klass: klass )
             location += 2
-            let s = String( format: "%02X", accessMask ); print( "access mask: \(s)" )
 
             // get the pointer to this class
             let thisClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
@@ -95,8 +94,18 @@ class Classloader {
             if( klass.cp[thisClassEntry].type != 7 ) { // must point to a class reference
                 throw JVMerror.ClassVerificationError( name: name )
             }
+            klass.thisClassRef = thisClassEntry
             location += 2
             let t = String( format: "%02X", thisClassEntry ); print( "this class entry in cp: \(t)" )
+
+            // get the pointer to the superclass for this class
+            let superClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+                    lsb: klass.rawBytes[location+2] ))
+            if( klass.cp[superClassEntry].type != 7 ) { // must point to a class reference
+                throw JVMerror.ClassVerificationError( name: name )
+            }
+            location += 2
+            let u = String( format: "%02X", superClassEntry ); print( "super-class entry in cp: \(u)" )
               //CURR: work on following fields.
         }
         catch JVMerror.ClassFormatError( name: klass.path ) {
@@ -126,16 +135,19 @@ class LoadedClass {
     var constantPoolCount = 0
     var assertionStatus = globals.assertionStatus
     var cp = [CpEntryTemplate]()
+    var accessMask = 0
+    var thisClassRef = 0
+    var superClassRef = 0
     
-    var  classIsPublic      = false
-    var  classIsFinal       = false
-    var  classIsSuper       = false
-    var  classIsInterface   = false
-    var  classIsAbstract    = false
-    var  classIsSynthetic   = false
-    var  classIsAnnotation  = false
-    var  classIsEnum        = false
-    var  classIsModule      = false
+    var classIsPublic      = false
+    var classIsFinal       = false
+    var classIsSuper       = false
+    var classIsInterface   = false
+    var classIsAbstract    = false
+    var classIsSynthetic   = false
+    var classIsAnnotation  = false
+    var classIsEnum        = false
+    var classIsModule      = false
     
 }
 
