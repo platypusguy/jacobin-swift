@@ -100,6 +100,13 @@ class Classloader {
             SuperClassName.process( klass: klass )
             location += 2
 
+            // get the count of interfaces implemented by this class
+            InterfaceCount.readInterfaceCount(klass: klass, location: location )
+            location += 2
+
+            //**Eventually: add handling of interfaces, when count > 0
+
+
 
               //CURR: work on following fields.
         }
@@ -135,6 +142,7 @@ class LoadedClass {
     var shortName = ""
     var superClassRef = 0
     var superClassName = ""
+    var interfaceCount = 0
     
     var classIsPublic      = false
     var classIsFinal       = false

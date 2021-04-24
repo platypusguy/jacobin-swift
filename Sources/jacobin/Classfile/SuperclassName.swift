@@ -35,6 +35,6 @@ class SuperClassName {
         let superNameEntry : CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
         klass.superClassName = superNameEntry.string
         log.log( msg: "Class: \( klass.path ) - superclass: \( klass.superClassName )",
-                 level: Logger.Level.SEVERE )
+                 level: Logger.Level.FINEST )
     }
 }
