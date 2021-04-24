@@ -88,15 +88,11 @@ class Classloader {
             AccessFlags.log( klass: klass )
             location += 2
 
-            // get the pointer to this class
-            let thisClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
-                                                                lsb: klass.rawBytes[location+2] ))
-            if( klass.cp[thisClassEntry].type != 7 ) { // must point to a class reference
-                throw JVMerror.ClassVerificationError( name: name )
-            }
-            klass.thisClassRef = thisClassEntry
+            // get the pointer to this class name
+            ThisClassName.readName( klass: klass, location: location )
+            ThisClassName.verify( klass: klass )
+            ThisClassName.process( klass: klass )
             location += 2
-            let t = String( format: "%02X", thisClassEntry ); print( "this class entry in cp: \(t)" )
 
             // get the pointer to the superclass for this class
             let superClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
@@ -136,7 +132,8 @@ class LoadedClass {
     var assertionStatus = globals.assertionStatus
     var cp = [CpEntryTemplate]()
     var accessMask = 0
-    var thisClassRef = 0
+    var thisClassRef : Int = 0
+    var shortName = ""
     var superClassRef = 0
     
     var classIsPublic      = false
