@@ -95,13 +95,12 @@ class Classloader {
             location += 2
 
             // get the pointer to the superclass for this class
-            let superClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
-                    lsb: klass.rawBytes[location+2] ))
-            if( klass.cp[superClassEntry].type != 7 ) { // must point to a class reference
-                throw JVMerror.ClassVerificationError( name: name )
-            }
+            SuperClassName.readName( klass: klass, location: location )
+            SuperClassName.verify( klass: klass )
+            SuperClassName.process( klass: klass )
             location += 2
-            let u = String( format: "%02X", superClassEntry ); print( "super-class entry in cp: \(u)" )
+
+
               //CURR: work on following fields.
         }
         catch JVMerror.ClassFormatError( name: klass.path ) {
@@ -135,6 +134,7 @@ class LoadedClass {
     var thisClassRef : Int = 0
     var shortName = ""
     var superClassRef = 0
+    var superClassName = ""
     
     var classIsPublic      = false
     var classIsFinal       = false
