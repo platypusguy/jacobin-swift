@@ -22,7 +22,7 @@ class ThisClassName {
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
         if( klass.cp[klass.thisClassRef].type != 7 ) { // must point to a class reference
-            log.log( msg: "ClassFormatError in \(klass.path): Invalid thisClassReference", level: Logger.Level.SEVERE )
+            jacobin.log.log( msg: "ClassFormatError in \(klass.path): Invalid thisClassReference", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
     }
@@ -33,7 +33,11 @@ class ThisClassName {
         let pointerToName = cRef.classNameIndex
         let shortNameEntry : CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
         klass.shortName = shortNameEntry.string
-        log.log( msg: "Class: \(klass.path) - short name: \(klass.shortName)",
-                 level: Logger.Level.SEVERE )
+    }
+
+    // log the class name (mostly used for diagnostic purposes)
+    static func log( klass: LoadedClass ) {
+        jacobin.log.log( msg: "Class: \(klass.path) - short name: \(klass.shortName)",
+                level: Logger.Level.FINEST )
     }
 }
