@@ -11,11 +11,17 @@ import Foundation
 /// This class is called from the classloader
 
 class InterfaceCount {
+
+    // read the number of interfaces (a 16-bit integer)
     static func readInterfaceCount( klass: LoadedClass, location: Int ) {
         let interfaceCount = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
                 lsb: klass.rawBytes[location+2] ))
         klass.interfaceCount = interfaceCount
-        log.log( msg: "Class: \( klass.path ) - # of interfaces: \( klass.interfaceCount )",
+    }
+
+    // log the value (mostly used for diagnostic purposes)
+    static func log( klass: LoadedClass ) {
+        jacobin.log.log( msg: "Class: \( klass.path ) - # of interfaces: \( klass.interfaceCount )",
                 level: Logger.Level.FINEST )
     }
 }

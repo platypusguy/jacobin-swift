@@ -15,14 +15,14 @@ class SuperClassName {
     // reads the entry in the class file that points to the superclass for this class
     static func readName( klass: LoadedClass, location: Int ) {
         let superClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
-                lsb: klass.rawBytes[location+2] ))
+                                                             lsb: klass.rawBytes[location+2] ))
         klass.superClassRef = superClassEntry
     }
 
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
         if( klass.cp[klass.superClassRef].type != 7 ) { // must point to a class reference
-            log.log( msg: "ClassFormatError in \( klass.path ): Invalid superClassReference",
+            jacobin.log.log( msg: "ClassFormatError in \( klass.path ): Invalid superClassReference",
                      level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
@@ -34,7 +34,11 @@ class SuperClassName {
         let pointerToName = cRef.classNameIndex
         let superNameEntry : CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
         klass.superClassName = superNameEntry.string
-        log.log( msg: "Class: \( klass.path ) - superclass: \( klass.superClassName )",
-                 level: Logger.Level.FINEST )
+    }
+
+    // log the name of the superclass (Mostly used for diagnostic purposes)
+    static func log( klass: LoadedClass ) {
+        jacobin.log.log( msg: "Class: \( klass.path ) - superclass: \( klass.superClassName )",
+                level: Logger.Level.FINEST )
     }
 }

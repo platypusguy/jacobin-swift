@@ -98,10 +98,12 @@ class Classloader {
             SuperClassName.readName( klass: klass, location: location )
             SuperClassName.verify( klass: klass )
             SuperClassName.process( klass: klass )
+            SuperClassName.log( klass: klass )
             location += 2
 
             // get the count of interfaces implemented by this class
             InterfaceCount.readInterfaceCount( klass: klass, location: location )
+            InterfaceCount.log( klass: klass )
             location += 2
 
             //**Eventually: add handling of interfaces, when count > 0
