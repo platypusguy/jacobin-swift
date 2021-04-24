@@ -121,7 +121,7 @@ class Classloader {
             MethodCount.log( klass: klass )
             location += 2
 
-              //CURR: work on following fields.
+              //CURR: work on getting method info...
         }
         catch JVMerror.ClassFormatError( name: klass.path ) {
             log.log( msg: "ClassFormatError in \(name)", level: Logger.Level.SEVERE )
@@ -247,5 +247,35 @@ class CpNameAndType: CpEntryTemplate {
         nameIndex = nameIdx
         descriptorIndex = descriptorIdx
     }
+
+class MethodInfo {
+    var accessFlags: Int16 = 0
+    var nameIndex = 0
+    var descriptorIndex = 0
+    var attributeCount = 0
+    var attributes = [Attribute]()
+}
+    /**
+     method_info {
+    u2             access_flags;
+    u2             name_index;
+    u2             descriptor_index;
+    u2             attributes_count;
+    attribute_info attributes[attributes_count];
+}
+     */
+
+class Attribute {
+    var attrNameIndex = 0
+    var attrLength = 0
+    var attrInfo = [UInt8]()
+}
+    /**
+     attribute_info {
+    u2 attribute_name_index;
+    u4 attribute_length;
+    u1 info[attribute_length];
+}
+     */
 }
 
