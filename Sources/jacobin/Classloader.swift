@@ -92,6 +92,7 @@ class Classloader {
             ThisClassName.readName( klass: klass, location: location )
             ThisClassName.verify( klass: klass )
             ThisClassName.process( klass: klass )
+            ThisClassName.log( klass: klass )
             location += 2
 
             // get the pointer to the superclass for this class
@@ -114,6 +115,11 @@ class Classloader {
             location += 2
 
             //**Eventually: add handling of fields , when count > 0
+
+            // get the count of methods in this class
+            MethodCount.readMethodCount( klass: klass, location: location )
+            MethodCount.log( klass: klass )
+            location += 2
 
               //CURR: work on following fields.
         }
@@ -151,6 +157,7 @@ class LoadedClass {
     var superClassName = ""
     var interfaceCount = 0
     var fieldCount = 0
+    var methodCount = 0
     
     var classIsPublic      = false
     var classIsFinal       = false
