@@ -122,9 +122,10 @@ class Classloader {
             location += 2
 
             for i in 0...(klass.methodCount - 1) {
-                MethodInfo.read( klass: klass, location: location )
-                MethodInfo.verify( klass: klass, index: i )
-                MethodInfo.log( klass: klass, index: i )
+                let mi = MethodInfo()
+                mi.read( klass: klass, location: location )
+//                mi.verify( klass: klass, index: i )
+                mi.log( klass: klass, index: i )
             }
 
               //CURR: work on getting method info...

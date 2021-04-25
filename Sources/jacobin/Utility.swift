@@ -11,7 +11,14 @@ import Foundation
 
 class Utility {
 
-        static func getInt16fromBytes( msb: UInt8, lsb: UInt8 ) -> Int16 {
-            return ( Int16( msb ) * 256 ) + Int16( lsb )
-        }
+    static func getInt16fromBytes( msb: UInt8, lsb: UInt8 ) -> Int16 {
+        return ( Int16( msb ) * 256 ) + Int16( lsb )
+    }
+
+    static func getUTF8stringFromConstantPoolIndex( klass: LoadedClass, index: Int ) -> String {
+            let cRef : CpEntryClassRef = klass.cp[index] as! CpEntryClassRef
+            let pointerToName = cRef.classNameIndex
+            let shortNameEntry : CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
+            return shortNameEntry.string
+    }
 }

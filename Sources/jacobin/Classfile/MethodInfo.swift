@@ -7,17 +7,75 @@
 import Foundation
 
 // reads, and loads into the class, method info and verifies it
+/**
+method_info {
+    u2             access_flags;
+    u2             name_index;
+    u2             descriptor_index;
+    u2             attributes_count;
+    attribute_info attributes[attributes_count];
+}
+ */
 class MethodInfo {
 
-    static func read( klass: LoadedClass, location: Int ) {
+    let methodData = MethodContents()
+
+    func read( klass: LoadedClass, location: Int ) {
+        // first get the access flags (a 2-byte field)
+        methodData.accessFlags = getMethodAccessFlags( klass: klass, location: location )
+        var presentLocation = location + 2
+
+        // get name index, which should point to a UTF8 entry, then get the UTF8 name string
+        let nameIndex = Int( Utility.getInt16fromBytes( msb: klass.rawBytes[presentLocation + 1],
+                                                        lsb: klass.rawBytes[presentLocation + 2] ))
+        var cpEntry = klass.cp[nameIndex]
+        if cpEntry.type != 1 {
+            jacobin.log.log( msg: "Error: Class: \(klass.path) - method name index \(nameIndex) invalid",
+                    level: Logger.Level.FINEST )
+        }
+        var UTF8entry = cpEntry as! CpEntryUTF8
+        methodData.name = UTF8entry.string
+        presentLocation += 2
+
+        // get the descriptor index, which should point to a UTF8 entry, then get the UTF8 name string
+        let descIndex = Int( Utility.getInt16fromBytes( msb: klass.rawBytes[presentLocation + 1],
+                                                        lsb: klass.rawBytes[presentLocation + 2] ))
+        cpEntry = klass.cp[descIndex]
+        if cpEntry.type != 1 {
+            jacobin.log.log( msg: "Error: Class: \(klass.path) - method desc index \(descIndex) invalid",
+                    level: Logger.Level.FINEST )
+        }
+        UTF8entry = cpEntry as! CpEntryUTF8
+        methodData.descriptor = UTF8entry.string
+        presentLocation += 2
+
+        // get the count of attributes
+        let attrCount = Int( Utility.getInt16fromBytes( msb: klass.rawBytes[presentLocation + 1],
+                                                        lsb: klass.rawBytes[presentLocation + 2] ))
+        methodData.attributeCount = attrCount
+        presentLocation += 2
+
+        // get the attributes
+    }
+
+    func verify( klass: LoadedClass, index: Int ) {
 
     }
 
-    static func verify( klass: LoadedClass, index: Int ) {
+    func log( klass: LoadedClass, index: Int ) {
+        jacobin.log.log( msg: "Class: \( klass.path ) - method name: \( methodData.name )",
+                         level: Logger.Level.FINEST )
+        jacobin.log.log( msg: "Class: \( klass.path ) - description: \( methodData.descriptor )",
+                level: Logger.Level.FINEST )
+        jacobin.log.log( msg: "Class: \( klass.path ) - # of attributes: \( methodData.attributeCount )",
+                level: Logger.Level.FINEST )
 
     }
 
-    static func log( klass: LoadedClass, index: Int ) {
-
+    // read the two-byte access flags
+    private func getMethodAccessFlags( klass: LoadedClass, location: Int ) -> Int16 {
+        let methodAccessFlags = Int16( Utility.getInt16fromBytes( msb: klass.rawBytes[location + 1],
+                lsb: klass.rawBytes[location + 2] ) )
+        return methodAccessFlags
     }
 }

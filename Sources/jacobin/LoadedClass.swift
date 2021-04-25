@@ -124,7 +124,9 @@ class CpNameAndType: CpEntryTemplate {
 class MethodContents {
     var accessFlags: Int16 = 0
     var nameIndex = 0
+    var name = ""
     var descriptorIndex = 0
+    var descriptor = ""
     var attributeCount = 0
     var attributes = [Attribute]()
 }
