@@ -56,6 +56,22 @@ class MethodInfo {
         presentLocation += 2
 
         // get the attributes
+        for i in 0...attrCount-1 {
+            var attr = Attribute()
+            presentLocation = fillInAttribute( attr: attr, klass: klass, location: presentLocation )
+            methodData.attributes.append( attr )
+        }
+    }
+
+    private func fillInAttribute( attr: Attribute, klass: LoadedClass, location: Int ) -> Int {
+        var currLocation = location
+        let attrNameIdx = Int( Utility.getInt16fromBytes( msb: klass.rawBytes[location + 1],
+                                                          lsb: klass.rawBytes[location + 2] ))
+        let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
+        print( "attribute name: \(attrName)")
+        currLocation += 2;
+        //curr: continue here, loading the Code attribute
+        return( currLocation )
     }
 
     func verify( klass: LoadedClass, index: Int ) {
