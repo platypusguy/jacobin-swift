@@ -67,9 +67,20 @@ class MethodInfo {
         var currLocation = location
         let attrNameIdx = Int( Utility.getInt16fromBytes( msb: klass.rawBytes[location + 1],
                                                           lsb: klass.rawBytes[location + 2] ))
-        let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
-        print( "attribute name: \(attrName)")
+        attr.attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
+        print( "attribute name: \(attr.attrName)" )
         currLocation += 2;
+
+        let first2bytesInLen  = Utility.getInt16fromBytes( msb: klass.rawBytes[currLocation + 1],
+                                                           lsb: klass.rawBytes[currLocation + 2] )
+        let second2bytesInLen = Utility.getInt16fromBytes( msb: klass.rawBytes[currLocation + 3],
+                                                           lsb: klass.rawBytes[currLocation + 4] )
+        let length : Int = (Int(first2bytesInLen) * 65535) + Int(second2bytesInLen)
+        attr.attrLength = length
+
+        print( "Code attribute length: \(length) at location \(currLocation)" )
+        currLocation += 4
+
         //curr: continue here, loading the Code attribute
         return( currLocation )
     }

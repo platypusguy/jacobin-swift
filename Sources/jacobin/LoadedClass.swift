@@ -133,6 +133,7 @@ class MethodContents {
 
 class Attribute {
     var attrNameIndex = 0
+    var attrName = ""
     var attrLength = 0
     var attrInfo = [UInt8]()
 }
