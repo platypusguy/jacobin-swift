@@ -51,35 +51,40 @@ class MethodInfo {
 
         // get the count of attributes
         let attrCount = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[presentLocation + 1],
-                                                        lsb: klass.rawBytes[presentLocation + 2] ))
+                                                         lsb: klass.rawBytes[presentLocation + 2] ))
         methodData.attributeCount = attrCount
         presentLocation += 2
 
         // get the attributes
         for _ in 0...attrCount-1 {
             var attr = Attribute()
-            presentLocation = fillInAttribute( attr: attr, klass: klass, location: presentLocation )
+            presentLocation = fillInAttribute( klass: klass, location: presentLocation )
             methodData.attributes.append( attr )
         }
     }
 
-    private func fillInAttribute( attr: Attribute, klass: LoadedClass, location: Int ) -> Int {
+    private func fillInAttribute( klass: LoadedClass, location: Int ) -> Int {
         var currLocation = location
         let attrNameIdx = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[location + 1],
-                                                          lsb: klass.rawBytes[location + 2] ))
-        attr.attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
-        print( "attribute name: \(attr.attrName)" )
+                                                           lsb: klass.rawBytes[location + 2] ))
+        let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
         currLocation += 2;
 
         let length = Utility.getInt32from4Bytes( byte1: klass.rawBytes[currLocation + 1],
                                                  byte2: klass.rawBytes[currLocation + 2],
                                                  byte3: klass.rawBytes[currLocation + 3],
                                                  byte4: klass.rawBytes[currLocation + 4] )
+        let attrLength = Int(length)
 
-        attr.attrLength = Int(length)
-
-        print( "Code attribute length: \(length) at location \(currLocation)" )
+        print( "\(attrName) attribute length: \(length) at location \(currLocation)" )
         currLocation += 4
+
+        if attrName == "Code" {
+            let codeAttr = CodeAttribute()
+            codeAttr.attrName = attrName
+            codeAttr.attrLength = attrLength
+            //curr: add method to fill in the code attribute. Put that code in CodeAttribute class
+        }
 
         //curr: continue here, loading the Code attribute
         return( currLocation )
