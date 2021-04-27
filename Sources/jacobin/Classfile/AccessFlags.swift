@@ -15,7 +15,7 @@ class AccessFlags {
     // read the class access flags from the raw bytes of the class, here name klass
     // returns the access flags as a 16-bit integer
     static func readAccessFlags( klass: LoadedClass, location: Int ) {
-        let accessFlags = Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+        let accessFlags = Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
                                                                   lsb: klass.rawBytes[location+2] )
         klass.accessMask = Int( accessFlags )
     }

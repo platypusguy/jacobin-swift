@@ -14,7 +14,7 @@ class MethodCount {
 
     // read the number of methods (a 16-bit integer)
     static func readMethodCount( klass: LoadedClass, location: Int ) {
-        let methodCount = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+        let methodCount = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
                 lsb: klass.rawBytes[location+2] ))
         klass.methodCount = methodCount
     }

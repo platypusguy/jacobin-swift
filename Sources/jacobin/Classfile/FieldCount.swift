@@ -11,7 +11,7 @@ class FieldCount {
 
     // extract the number of fields in this class
     static func readFieldCount( klass: LoadedClass, location: Int ) {
-        let fieldCount = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+        let fieldCount = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
                 lsb: klass.rawBytes[location+2] ))
         klass.fieldCount = fieldCount
 

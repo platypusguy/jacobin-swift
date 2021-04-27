@@ -14,7 +14,7 @@ class InterfaceCount {
 
     // read the number of interfaces (a 16-bit integer)
     static func readInterfaceCount( klass: LoadedClass, location: Int ) {
-        let interfaceCount = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+        let interfaceCount = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
                 lsb: klass.rawBytes[location+2] ))
         klass.interfaceCount = interfaceCount
     }

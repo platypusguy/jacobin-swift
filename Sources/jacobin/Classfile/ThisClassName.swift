@@ -14,7 +14,7 @@ class ThisClassName {
 
     // reads the entry in the class file that points to the short name for this class
     static func readName( klass: LoadedClass, location: Int ) {
-        let thisClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+        let thisClassEntry = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
                 lsb: klass.rawBytes[location+2] ))
         klass.thisClassRef = thisClassEntry
     }

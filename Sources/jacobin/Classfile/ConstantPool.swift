@@ -28,7 +28,7 @@ class ConstantPool {
             switch( cpeType ) {
             case 1: // UTF-8 string
                 let length =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 byteCounter += 2
                 var buffer = [UInt8]()
                 for n in 0...Int(length-1)  {
@@ -42,7 +42,7 @@ class ConstantPool {
 
             case 7: // class reference
                 let classNameIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let classNameRef = CpEntryClassRef( index: classNameIndex )
                 klass.cp.append( classNameRef )
                 byteCounter += 2
@@ -50,7 +50,7 @@ class ConstantPool {
 
             case 8: // string reference
                 let stringIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let stringRef = CpEntryStringRef( index: stringIndex )
                 klass.cp.append( stringRef )
                 byteCounter += 2
@@ -58,9 +58,9 @@ class ConstantPool {
 
             case  9: // field reference
                 let classIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let nameAndTypeIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
                 byteCounter += 4
                 let fieldRef : CpEntryFieldRef = CpEntryFieldRef( classIndex: classIndex,
                         nameAndTypeIndex: nameAndTypeIndex );
@@ -69,9 +69,9 @@ class ConstantPool {
 
             case 10: // method reference
                 let classIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let nameAndTypeIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
                 byteCounter += 4
                 let methodRef : CpEntryMethodRef = CpEntryMethodRef( classIndex: classIndex,
                         nameAndTypeIndex: nameAndTypeIndex );
@@ -80,9 +80,9 @@ class ConstantPool {
 
             case 12: // name and type info
                 let nameIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let descriptorIndex =
-                        Utility.getInt16fromBytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
                 byteCounter += 4
                 let nameAndType : CpNameAndType =
                         CpNameAndType( nameIdx: Int(nameIndex), descriptorIdx: Int(descriptorIndex))

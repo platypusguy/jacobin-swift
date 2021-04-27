@@ -14,7 +14,7 @@ class SuperClassName {
 
     // reads the entry in the class file that points to the superclass for this class
     static func readName( klass: LoadedClass, location: Int ) {
-        let superClassEntry = Int(Utility.getInt16fromBytes( msb: klass.rawBytes[location+1],
+        let superClassEntry = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
                                                              lsb: klass.rawBytes[location+2] ))
         klass.superClassRef = superClassEntry
     }
