@@ -83,7 +83,7 @@ class MethodInfo {
             let codeAttr = CodeAttribute()
             codeAttr.attrName = attrName
             codeAttr.attrLength = attrLength
-            //curr: add method to fill in the code attribute. Put that code in CodeAttribute class
+            codeAttr.load(klass, location: currLocation)
         }
 
         //curr: continue here, loading the Code attribute

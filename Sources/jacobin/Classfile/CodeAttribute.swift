@@ -1,0 +1,82 @@
+/*
+ * jacobin - JVM written in Swift
+ *
+ * Copyright (c) 2021 Andrew Binstock. All rights reserved.
+ * Licensed under Mozilla Public License, v. 2.0. http://mozilla.org/MPL/2.0/.
+ */
+
+import Foundation
+
+class CodeAttribute: Attribute {
+    /**
+    u2 max_stack;
+    u2 max_locals;
+    u4 code_length;
+    u1 code[code_length];
+    u2 exception_table_length;
+    {   u2 start_pc;
+        u2 end_pc;
+        u2 handler_pc;
+        u2 catch_type;
+    } exception_table[exception_table_length];
+    u2 attributes_count;
+    attribute_info attributes[attributes_count];
+     */
+    var maxStack = 0
+    var maxLocals = 0
+    var codeLength = 0
+    var code : [UInt8] = []
+    var exceptionTableLength = 0
+    struct ExceptionEntry {
+        var startPc = 0
+        var handlerPc = 0
+        var catchType = 0
+    }
+    var exceptionTable : [ExceptionEntry] = []
+    var codeAttrCount = 0
+    var codeAttrTable : [AttributeInfo] = []
+
+    // read the code attribute and load the items into the class fields
+    func load(_ klass: LoadedClass, location: Int) {
+        // get the maximum stack
+        var currLoc = location
+        let maxStack = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
+                                                        lsb: klass.rawBytes[currLoc + 2] ))
+        currLoc += 2
+
+        // get the maximum # of locals
+        let maxLocals = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
+                                                         lsb: klass.rawBytes[currLoc + 2] ))
+        currLoc += 2
+
+        // get the length of the codebyte array
+        let codeLength = Int( Utility.getInt32from4Bytes(
+                byte1: klass.rawBytes[currLoc + 1], byte2: klass.rawBytes[currLoc + 2],
+                byte3: klass.rawBytes[currLoc + 3], byte4: klass.rawBytes[currLoc + 4] ))
+        print( "Class \(klass.path) size of bytecode: \(codeLength)")
+        currLoc += 4
+
+        // load the bytecode into code array
+        for i in 1...codeLength {
+            code.append( klass.rawBytes[currLoc+i])
+        }
+        currLoc += codeLength
+        print( "location: \(currLoc)")
+
+        // get exception table length (= number of entries, rather than length in bytes)
+        exceptionTableLength =
+                Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
+                                                 lsb: klass.rawBytes[currLoc + 2] ))
+        currLoc += 2
+        print( "Class \(klass.path) exception table length: \(exceptionTableLength)" )
+
+        //TODO: add handling of exception table when there is one
+
+        // get the code attribute count
+        codeAttrCount =
+                Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
+                                                 lsb: klass.rawBytes[currLoc + 2] ))
+        currLoc += 2
+        print( "Class\(klass.path) code attribute count: \(codeAttrCount)")
+    }
+}
