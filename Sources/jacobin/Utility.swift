@@ -16,7 +16,12 @@ class Utility {
         return ( Int16( msb ) * 256 ) + Int16( lsb )
     }
 
-    // converts four successive bytes into a 32-bit integer
+    // converts four successive bytes into an Int. Note index points to first byte.
+    static func getIntfrom4Bytes( bytes: [UInt8], index: Int ) -> Int {
+        Int( getInt32from4Bytes( byte1: bytes[index],   byte2: bytes[index+1],
+                                 byte3: bytes[index+2], byte4: bytes[index+3] ))
+    }
+    // converts four bytes into a 32-bit integer
     static func getInt32from4Bytes( byte1: UInt8, byte2: UInt8,
                                     byte3: UInt8, byte4: UInt8) -> Int32 {
         let firstBytes = getInt16from2Bytes( msb: byte1, lsb: byte2 )

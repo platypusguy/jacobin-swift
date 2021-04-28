@@ -50,9 +50,7 @@ class CodeAttribute: Attribute {
         currLoc += 2
 
         // get the length of the codebyte array
-        let codeLength = Int( Utility.getInt32from4Bytes(
-                byte1: klass.rawBytes[currLoc + 1], byte2: klass.rawBytes[currLoc + 2],
-                byte3: klass.rawBytes[currLoc + 3], byte4: klass.rawBytes[currLoc + 4] ))
+        let codeLength = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLoc+1 )
         print( "Class \(klass.path) size of bytecode: \(codeLength)")
         currLoc += 4
 
