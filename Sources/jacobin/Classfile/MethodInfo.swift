@@ -70,10 +70,7 @@ class MethodInfo {
         let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
         currLocation += 2;
 
-        let length = Utility.getInt32from4Bytes( byte1: klass.rawBytes[currLocation + 1],
-                                                 byte2: klass.rawBytes[currLocation + 2],
-                                                 byte3: klass.rawBytes[currLocation + 3],
-                                                 byte4: klass.rawBytes[currLocation + 4] )
+        let length = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLocation+1 )
         let attrLength = Int(length)
 
         print( "\(attrName) attribute length: \(length) at location \(currLocation)" )
