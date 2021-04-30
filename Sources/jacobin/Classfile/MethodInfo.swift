@@ -20,7 +20,7 @@ class MethodInfo {
 
     let methodData = MethodContents()
 
-    func read( klass: LoadedClass, location: Int ) {
+    func read( klass: LoadedClass, location: Int ) -> Int {
         // first get the access flags (a 2-byte field)
         methodData.accessFlags = getMethodAccessFlags( klass: klass, location: location )
         var presentLocation = location + 2
@@ -59,8 +59,9 @@ class MethodInfo {
         for _ in 0...attrCount-1 {
             var attr = Attribute()
             presentLocation = fillInAttribute( klass: klass, location: presentLocation )
-            methodData.attributes.append( attr )
+  //          methodData.attributes.append( attr )
         }
+        return presentLocation
     }
 
     private func fillInAttribute( klass: LoadedClass, location: Int ) -> Int {
@@ -80,10 +81,9 @@ class MethodInfo {
             let codeAttr = CodeAttribute()
             codeAttr.attrName = attrName
             codeAttr.attrLength = attrLength
-            codeAttr.load(klass, location: currLocation)
+            currLocation = codeAttr.load( klass, location: currLocation )
         }
 
-        //curr: continue here, loading the Code attribute
         return( currLocation )
     }
 

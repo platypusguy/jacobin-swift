@@ -36,6 +36,7 @@ class LineNumberTable {
             let line = Utility.getIntFrom2Bytes(bytes: klass, index: currLoc+3 )
             let e = Entry( pc: pc, line: line )
             entries.append( e )
+            print( "Line number entry: pc: \(pc) line# \(line)" )
             currLoc += 4
         }
 
