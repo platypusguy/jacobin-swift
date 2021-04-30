@@ -33,8 +33,8 @@ class CodeAttribute: Attribute {
         var catchType = 0
     }
     var exceptionTable : [ExceptionEntry] = []
-    var codeAttrCount = 0
-    var codeAttrTable : [AttributeInfo] = []
+    var lineNumTable : [LineNumberTable] = []
+
 
     // read the code attribute and load the items into the class fields
     func load(_ klass: LoadedClass, location: Int) {
@@ -71,10 +71,24 @@ class CodeAttribute: Attribute {
         //TODO: add handling of exception table when there is one
 
         // get the code attribute count
-        codeAttrCount =
-                Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
-                                                 lsb: klass.rawBytes[currLoc + 2] ))
+        let codeAttrCount =
+                Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
         currLoc += 2
-        print( "Class\(klass.path) code attribute count: \(codeAttrCount)")
+        print( "Class\(klass.path) code attribute count: \(codeAttrCount)" )
+
+        // handle the code attributes
+        let codeAttrNamePointer =
+                Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
+        currLoc += 2
+
+        let codeAttrName =
+            Utility.getUTF8stringFromConstantPoolIndex( klass:klass, index: codeAttrNamePointer )
+        print( "Class\(klass.path), code attribute: \(codeAttrName)" )
+
+        if codeAttrName == "LineNumberTable" {
+            let lnt = LineNumberTable( )
+            currLoc = lnt.load( klass: klass.rawBytes, loc: currLoc )
+            lineNumTable.append( lnt )
+        }
     }
 }
