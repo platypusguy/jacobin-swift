@@ -36,7 +36,7 @@ func main() throws {
 
 // load classes starting with the main class of the app
 func loadClasses( startingClass: String ) throws {
-    try globals.systemLoader.load( name: startingClass )
+    globals.systemLoader.add( name: startingClass )
 }
 
 // parse the command line and capture all the various settings it specifies.

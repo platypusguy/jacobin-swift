@@ -20,22 +20,46 @@ class Classloader {
         self.parent = parent
     }
 
-    // load a class into the classloader, if it's not already there
-    func add( name: String, klass: LoadedClass ) {
+    /// inserts a parsed class into the classloader, if it's not already there
+    /// - Parameters:
+    ///   - name: the name of the class
+    ///   - klass: the Swift class containing all the needed parsed data
+    private func insert( name: String, klass: LoadedClass ) {
         if( cl[name] == nil ) {
             cl[name] = klass;
         }
     }
 
-    // reads in a class, parses it, creates a loadable class and loads it, provided the class is not
-    // already in the classloader
-    func load( name: String ) throws {
+    /// add a class for which we have only the name, provided that it's not already
+    /// in this classloader
+    /// - Parameter name: the name of the class
+    func add( name: String ) {
+        if cl[name] != nil { return } // do nothing if the class is already loaded
+
+        var klass = LoadedClass()
+        do {
+            try load( name: name, klass: klass )
+            insert( name: name, klass: klass )
+        }
+        catch JVMerror.ClassFormatError {
+            shutdown( successFlag: false ) // error msg has already been shown to user
+        }
+        catch { // any other errors are unexpected, we should tell the user
+            log.log( msg: "Unexpected error loading class \(name)",
+                    level: Logger.Level.SEVERE)
+        }
+    }
+
+    // CURR >>>> move load to its own class. Maybe ClassParser.swift or the like
+    // CURR >>>> possibly keep the read function here and export just the parsing
+    // reads in a class, parses it, creates a loadable class and loads it
+    // then adds it to the class loader
+    func load( name: String, klass: LoadedClass  ) throws {
 
         if cl[name] != nil { // if the class is already in the loader, return TODO: go up the chain of classloaders
             return
         }
 
-        let klass = LoadedClass()
         let fileURL = URL( string: "file:" + name )!
         do {
             let data = try Data( contentsOf: fileURL, options: [.uncached] )
@@ -131,7 +155,7 @@ class Classloader {
         }
         catch JVMerror.ClassFormatError( name: klass.path ) {
             log.log( msg: "ClassFormatError in \(name)", level: Logger.Level.SEVERE )
-            shutdown( successFlag: false )
+            throw JVMerror.ClassFormatError( name: "" )
         }
 
         //TODO: and validate with the logic here: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.1
