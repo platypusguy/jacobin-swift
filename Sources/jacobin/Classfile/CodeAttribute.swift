@@ -22,24 +22,27 @@ class CodeAttribute: Attribute {
     u2 attributes_count;
     attribute_info attributes[attributes_count];
      */
-    var maxStack = 0
-    var maxLocals = 0
-    var codeLength = 0
-    var code : [UInt8] = []
-    var exceptionTableLength = 0
-    struct ExceptionEntry {
-        var startPc = 0
-        var handlerPc = 0
-        var catchType = 0
-    }
-    var exceptionTable : [ExceptionEntry] = []
-    var lineNumTable : [LineNumberTable] = []
+//    var maxStack = 0
+//    var maxLocals = 0
+//    var codeLength = 0
+//    var code : [UInt8] = []
+//    var exceptionTableLength = 0
+//    struct ExceptionEntry {
+//        var startPc = 0
+//        var handlerPc = 0
+//        var catchType = 0
+//    }
+//    var exceptionTable : [ExceptionEntry] = []
+//    var lineNumTable : [LineNumberTable] = []
 
 
     /// read the code attribute and load the items into the class fields
+    /// - parameter klass: the bytes we're parsing
+    /// - location: where we are in the klass bytes
+    /// - methodData: the Method class we're loading up with the code data
     /// - returns the location of the last read byte
-    func load(_ klass: LoadedClass, location: Int) -> Int {
-        // get the maximum stack
+    func load(_ klass: LoadedClass, location: Int, methodData: Method ) -> Int {
+
         var currLoc = location
         let maxStack = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
                                                         lsb: klass.rawBytes[currLoc + 2] ))
@@ -57,13 +60,13 @@ class CodeAttribute: Attribute {
 
         // load the bytecode into code array
         for i in 1...codeLength {
-            code.append( klass.rawBytes[currLoc+i])
+            methodData.code.append( klass.rawBytes[currLoc+i])
         }
         currLoc += codeLength
         print( "location: \(currLoc)")
 
         // get exception table length (= number of entries, rather than length in bytes)
-        exceptionTableLength =
+        let exceptionTableLength =
                 Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
                                                  lsb: klass.rawBytes[currLoc + 2] ))
         currLoc += 2
@@ -77,6 +80,8 @@ class CodeAttribute: Attribute {
         currLoc += 2
         print( "Class\(klass.path) code attribute count: \(codeAttrCount)" )
 
+        let lnt = LineNumberTable()
+
         for _ in 1...codeAttrCount {
             // handle the code attributes
             let codeAttrNamePointer =
@@ -87,11 +92,20 @@ class CodeAttribute: Attribute {
                     Utility.getUTF8stringFromConstantPoolIndex( klass:klass, index: codeAttrNamePointer )
             print( "Class\(klass.path), code attribute: \(codeAttrName)" )
 
+
             if codeAttrName == "LineNumberTable" {
-                let lnt = LineNumberTable()
                 currLoc = lnt.load( klass: klass.rawBytes, loc: currLoc )
-                lineNumTable.append( lnt )
+                for i in 0...lnt.entryCount-1 {
+                    let pc   = lnt.entries[i].pc
+                    let line = lnt.entries[i].line
+                    var entry : [Int] = []; entry.append( pc ); entry.append( line )
+                    methodData.lineNumTable.append( entry )
+                }
             }
+        }
+
+        for i in 0...lnt.entryCount-1 {
+            print( "line # table entry: pc > \(methodData.lineNumTable[i][0]) line # > \(methodData.lineNumTable[i][1])")
         }
         return currLoc
     }

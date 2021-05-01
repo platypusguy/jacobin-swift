@@ -18,7 +18,7 @@ method_info {
  */
 class MethodInfo {
 
-    let methodData = MethodContents()
+    var methodData = Method()
 
     func read( klass: LoadedClass, location: Int ) -> Int {
         // first get the access flags (a 2-byte field)
@@ -52,7 +52,7 @@ class MethodInfo {
         // get the count of attributes
         let attrCount = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[presentLocation + 1],
                                                          lsb: klass.rawBytes[presentLocation + 2] ))
-        methodData.attributeCount = attrCount
+//        methodData.attributeCount = attrCount
         presentLocation += 2
 
         // get the attributes
@@ -64,6 +64,7 @@ class MethodInfo {
         return presentLocation
     }
 
+    // gets the attribute data and puts it into the methodData structure
     private func fillInAttribute( klass: LoadedClass, location: Int ) -> Int {
         var currLocation = location
         let attrNameIdx = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[location + 1],
@@ -81,14 +82,10 @@ class MethodInfo {
             let codeAttr = CodeAttribute()
             codeAttr.attrName = attrName
             codeAttr.attrLength = attrLength
-            currLocation = codeAttr.load( klass, location: currLocation )
+            currLocation = codeAttr.load( klass, location: currLocation, methodData: methodData )
         }
 
         return( currLocation )
-    }
-
-    func verify( klass: LoadedClass, index: Int ) {
-
     }
 
     func log( klass: LoadedClass, index: Int ) {
@@ -96,15 +93,17 @@ class MethodInfo {
                          level: Logger.Level.FINEST )
         jacobin.log.log( msg: "Class: \( klass.path ) - description: \( methodData.descriptor )",
                 level: Logger.Level.FINEST )
-        jacobin.log.log( msg: "Class: \( klass.path ) - # of attributes: \( methodData.attributeCount )",
-                level: Logger.Level.FINEST )
+        jacobin.log.log( msg: "Method: \(methodData.name) bytecode length: \(methodData.code.count)",
+                         level: Logger.Level.FINEST )
+//        jacobin.log.log( msg: "Class: \( klass.path ) - # of attributes: \( methodData.attributeCount )",
+//                level: Logger.Level.FINEST )
 
     }
 
     // read the two-byte access flags
     private func getMethodAccessFlags( klass: LoadedClass, location: Int ) -> Int16 {
         let methodAccessFlags = Int16( Utility.getInt16from2Bytes( msb: klass.rawBytes[location + 1],
-                lsb: klass.rawBytes[location + 2] ) )
+                                                                   lsb: klass.rawBytes[location + 2] ) )
         return methodAccessFlags
     }
 }

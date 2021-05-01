@@ -25,7 +25,7 @@ class LoadedClass {
     var interfaceCount = 0
     var fieldCount = 0
     var methodCount = 0
-    var methodInfo = [MethodContents]()
+    var methodInfo : [Method] = []
 
     var classIsPublic      = false
     var classIsFinal       = false
@@ -121,13 +121,23 @@ class CpNameAndType: CpEntryTemplate {
     }
 }
 
-class MethodContents {
-    var accessFlags: Int16 = 0
-    var nameIndex = 0
+class Method {
     var name = ""
-    var descriptorIndex = 0
     var descriptor = ""
-    var attributeCount = 0
-    var attributes = [Attribute]()
+    var maxStack = 0
+    var maxLocals = 0
+    var codeLength = 0
+    var code : [UInt8] = []
+    var exceptionTableLength = 0
+    struct ExceptionEntry {
+        var startPc = 0
+        var handlerPc = 0
+        var catchType = 0
+    }
+    var exceptionTable : [ExceptionEntry] = []
+//    var lineNumTable : [LineNumberTable] = []
+    var accessFlags: Int16 = 0
+    typealias LineNumber = [Int]
+    var lineNumTable : [LineNumber] = []
 }
 

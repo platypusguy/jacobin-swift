@@ -38,11 +38,10 @@ class Classloader {
         let klass = LoadedClass()
         let fileURL = URL( string: "file:" + name )!
         do {
-            let data = try? Data( contentsOf: fileURL, options: [.uncached] )
+            let data = try Data( contentsOf: fileURL, options: [.uncached] )
     //            print( "class read, size: \(data?.count)" ) //TODO: test for the I/O exception here not at the bottom.
-
             klass.path = name
-            klass.rawBytes = [UInt8]( data.unsafelyUnwrapped )
+            klass.rawBytes = [UInt8]( data )
 
         } catch {
             log.log( msg: "Error reading file: \(name) Exiting", level: Logger.Level.SEVERE )
