@@ -89,7 +89,9 @@ class ConstantPool {
                 klass.cp.append( nameAndType )
                 print( "Name and type info: name index: \(nameIndex) descriptorIndex: \(descriptorIndex)")
 
-            default: break
+            default:
+                print( "** Unhandled constant pool entry found: \(cpeType)" )
+                break
             }
         }
         return byteCounter
