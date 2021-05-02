@@ -39,18 +39,19 @@ class CodeAttribute: Attribute {
     /// read the code attribute and load the items into the class fields
     /// - parameter klass: the bytes we're parsing
     /// - location: where we are in the klass bytes
-    /// - methodData: the Method class we're loading up with the code data
+    /// - methodData: the Method object we're loading up with the code data
     /// - returns the location of the last read byte
     func load(_ klass: LoadedClass, location: Int, methodData: Method ) -> Int {
 
         var currLoc = location
-        let maxStack = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
-                                                        lsb: klass.rawBytes[currLoc + 2] ))
+        methodData.maxStack = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
+                                                               lsb: klass.rawBytes[currLoc + 2] ))
+
         currLoc += 2
 
         // get the maximum # of locals
-        let maxLocals = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
-                                                         lsb: klass.rawBytes[currLoc + 2] ))
+        methodData.maxLocals = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
+                                                                lsb: klass.rawBytes[currLoc + 2] ))
         currLoc += 2
 
         // get the length of the codebyte array

@@ -69,14 +69,14 @@ class ClassParser {
             AccessFlags.log( klass: klass )
             location += 2
 
-            // get the pointer to this class name
+            // get the pointer to this class name and extract the name
             ThisClassName.readName( klass: klass, location: location )
             ThisClassName.verify( klass: klass )
             ThisClassName.process( klass: klass )
             ThisClassName.log( klass: klass )
             location += 2
 
-            // get the pointer to the superclass for this class
+            // get the pointer to the superclass for this class and extract the name
             SuperClassName.readName( klass: klass, location: location )
             SuperClassName.verify( klass: klass )
             SuperClassName.process( klass: klass )
@@ -107,6 +107,7 @@ class ClassParser {
                 location = mi.read( klass: klass, location: location )
 //                mi.verify( klass: klass, index: i )
                 mi.log( klass: klass, index: i )
+                klass.methodInfo.append( mi.methodData )
             }
 
             //CURR: work on getting method info...

@@ -18,9 +18,7 @@ class LoadedClass {
     var assertionStatus = globals.assertionStatus
     var cp = [CpEntryTemplate]()
     var accessMask = 0
-    var thisClassRef : Int = 0
     var shortName = ""
-    var superClassRef = 0
     var superClassName = ""
     var interfaceCount = 0
     var fieldCount = 0

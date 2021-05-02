@@ -82,7 +82,8 @@ class MethodInfo {
             let codeAttr = CodeAttribute()
             codeAttr.attrName = attrName
             codeAttr.attrLength = attrLength
-            currLocation = codeAttr.load( klass, location: currLocation, methodData: methodData )
+            currLocation =
+                codeAttr.load( klass, location: currLocation, methodData: methodData )
         }
 
         return( currLocation )

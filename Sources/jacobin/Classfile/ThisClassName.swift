@@ -11,17 +11,17 @@ import Foundation
 /// This class is called from the classloader
 
 class ThisClassName {
+    static var thisClassRef = 0;
 
     // reads the entry in the class file that points to the short name for this class
     static func readName( klass: LoadedClass, location: Int ) {
-        let thisClassEntry = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
-                lsb: klass.rawBytes[location+2] ))
-        klass.thisClassRef = thisClassEntry
+        thisClassRef = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
+                                                       lsb: klass.rawBytes[location+2] ))
     }
 
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
-        if( klass.cp[klass.thisClassRef].type != 7 ) { // must point to a class reference
+        if( klass.cp[thisClassRef].type != 7 ) { // must point to a class reference
             jacobin.log.log( msg: "ClassFormatError in \(klass.path): Invalid thisClassReference", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
@@ -29,7 +29,7 @@ class ThisClassName {
 
     // looks up the pointed-to name for this class and inserts it into klass.shortName; and logs it
     static func process( klass: LoadedClass ){
-        let cRef : CpEntryClassRef = klass.cp[klass.thisClassRef] as! CpEntryClassRef
+        let cRef : CpEntryClassRef = klass.cp[thisClassRef] as! CpEntryClassRef
         let pointerToName = cRef.classNameIndex
         let shortNameEntry : CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
         klass.shortName = shortNameEntry.string

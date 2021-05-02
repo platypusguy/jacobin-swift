@@ -11,17 +11,17 @@ import Foundation
 /// This class is called from the classloader
 
 class SuperClassName {
+    static var superClassRef = 0
 
     // reads the entry in the class file that points to the superclass for this class
     static func readName( klass: LoadedClass, location: Int ) {
-        let superClassEntry = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
-                                                             lsb: klass.rawBytes[location+2] ))
-        klass.superClassRef = superClassEntry
+        superClassRef = Int(Utility.getInt16from2Bytes( msb: klass.rawBytes[location+1],
+                                                        lsb: klass.rawBytes[location+2] ))
     }
 
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
-        if( klass.cp[klass.superClassRef].type != 7 ) { // must point to a class reference
+        if( klass.cp[superClassRef].type != 7 ) { // must point to a class reference
             jacobin.log.log( msg: "ClassFormatError in \( klass.path ): Invalid superClassReference",
                      level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
@@ -30,7 +30,7 @@ class SuperClassName {
 
     // looks up the pointed-to name for the superclass and inserts it into klass.shortName; and logs it
     static func process( klass: LoadedClass ){
-        let cRef : CpEntryClassRef = klass.cp[klass.superClassRef] as! CpEntryClassRef
+        let cRef : CpEntryClassRef = klass.cp[superClassRef] as! CpEntryClassRef
         let pointerToName = cRef.classNameIndex
         let superNameEntry : CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
         klass.superClassName = superNameEntry.string
