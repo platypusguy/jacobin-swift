@@ -18,13 +18,11 @@ class ClassParser {
     ///   - JVMerror.ClassFormatError - if the parser finds anything unexpected
     static func parseClassfile( name: String, klass: LoadedClass ) throws {
 
+        klass.path = name
         let fileURL = URL( string: "file:" + name )!
         do {
             let data = try Data( contentsOf: fileURL, options: [.uncached] )
-            //            print( "class read, size: \(data?.count)" ) //TODO: test for the I/O exception here not at the bottom.
-            klass.path = name
             klass.rawBytes = [UInt8]( data )
-
         } catch {
             log.log( msg: "Error reading file: \(name) Exiting", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
@@ -33,12 +31,12 @@ class ClassParser {
         do {
             //check that the class file begins with the magic number 0xCAFEBABE
             if klass.rawBytes[0] != 0xCA || klass.rawBytes[1] != 0xFE ||
-                       klass.rawBytes[2] != 0xBA || klass.rawBytes[3] != 0xBE {
+               klass.rawBytes[2] != 0xBA || klass.rawBytes[3] != 0xBE {
                 throw JVMerror.ClassFormatError( name: name )
             }
 
             //check that the file version is not above JDK 11 (that is, 55)
-            let version = Int( Int16( klass.rawBytes[6] ) * 256 ) + Int( klass.rawBytes[7] )
+            let version = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: 6 )
             if version > 55 {
                 log.log(
                         msg: "Error: this version of Jacobin supports only Java classes at or below Java 11. Exiting.",
@@ -50,7 +48,7 @@ class ClassParser {
             }
 
             // get the constant pool count
-            let cpCount: Int = Int( Int16( klass.rawBytes[8] ) * 256 ) + Int( klass.rawBytes[9] )
+            let cpCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: 8 )
             if cpCount < 2 {
                 throw JVMerror.ClassFormatError( name: name + " constant pool count." )
             } else {
@@ -109,8 +107,6 @@ class ClassParser {
                 mi.log( klass: klass, index: i )
                 klass.methodInfo.append( mi.methodData )
             }
-
-            //CURR: work on getting method info...
         }
         catch JVMerror.ClassFormatError( name: klass.path ) {
             log.log( msg: "ClassFormatError in \(name)", level: Logger.Level.SEVERE )
