@@ -11,20 +11,25 @@ import Foundation
 
 class Utility {
 
-    // converts two successive bytes into a 16-bit integer
+    // converts two successive bytes into a 16-bit unsigned integer
     static func getInt16from2Bytes( msb: UInt8, lsb: UInt8 ) -> Int16 {
-        return ( Int16( msb ) * 256 ) + Int16( lsb )
+        return Int16(( Int( msb ) * 256 ) + Int( lsb ))
     }
 
     // converts two successive bytes into an Int
     static func getIntFrom2Bytes( bytes: [UInt8], index: Int ) -> Int {
-        Int( getInt16from2Bytes( msb: bytes[index], lsb: bytes[index+1] ))
+        Int(Int((bytes[index]))*256) + Int( bytes[index+1] )
     }
 
     // converts four successive bytes into an Int. Note index points to first byte.
     static func getIntfrom4Bytes( bytes: [UInt8], index: Int ) -> Int {
-        Int( getInt32from4Bytes( byte1: bytes[index],   byte2: bytes[index+1],
-                                 byte3: bytes[index+2], byte4: bytes[index+3] ))
+        var loc = index
+        let i1 = getIntFrom2Bytes(bytes: bytes, index: loc )
+        loc += 2
+        let i2 = getIntFrom2Bytes(bytes: bytes, index: loc )
+        return(( i1 * 65536 ) + i2 )
+//        Int( getInt32from4Bytes( byte1: bytes[index],   byte2: bytes[index+1],
+//                                 byte3: bytes[index+2], byte4: bytes[index+3] ))
     }
     // converts four bytes into a 32-bit integer
     static func getInt32from4Bytes( byte1: UInt8, byte2: UInt8,
