@@ -88,6 +88,14 @@ class CpEntryStringRef: CpEntryTemplate {
     }
 }
 
+class CpIntegerConstant: CpEntryTemplate {  // Constant Integer
+    var int = 0
+    init( value: Int ) {
+        super.init( type: 3 )
+        int = value
+    }
+}
+
 class CpEntryClassRef: CpEntryTemplate {
     var classNameIndex = 0
 

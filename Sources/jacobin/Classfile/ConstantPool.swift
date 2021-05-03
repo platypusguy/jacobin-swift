@@ -40,6 +40,14 @@ class ConstantPool {
                 byteCounter += Int(length)
                 print( "UTF-8 string: \( UTF8string ) ")
 
+            case 3: // integer constant
+                let value =
+                        Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                let integerConstantEntry = CpIntegerConstant( value: value )
+                klass.cp.append( integerConstantEntry )
+                byteCounter += 4
+                print( "Integer constant: \( value )" )
+
             case 7: // class reference
                 let classNameIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
