@@ -54,7 +54,7 @@ class CpEntryTemplate {
     }
 }
 
-class CpEntryMethodRef: CpEntryTemplate {
+class CpEntryMethodRef: CpEntryTemplate {  // method reference (10)
     var classIndex = 0
     var nameAndTypeIndex = 0
 
@@ -87,7 +87,7 @@ class CpEntryInterfaceMethodRef: CpEntryMethodRef {
         self.nameAndTypeIndex = Int(nameAndTypeIndex)
     }
 }
-class CpEntryStringRef: CpEntryTemplate {
+class CpEntryStringRef: CpEntryTemplate {  // string reference (8)
     var stringIndex = 0
 
     init( index: Int16 ) {
@@ -96,23 +96,25 @@ class CpEntryStringRef: CpEntryTemplate {
     }
 }
 
-class CpIntegerConstant: CpEntryTemplate {  // Constant Integer
+class CpIntegerConstant: CpEntryTemplate {  // Constant Integer (3)
     var int = 0
+
     init( value: Int ) {
         super.init( type: 3 )
         int = value
     }
 }
 
-class CpLongConstant : CpEntryTemplate {  // Constant long
+class CpLongConstant : CpEntryTemplate {  // Constant long (5)
     var long: Int64 = 0
+
     init( value: Int64 ) {
         super.init( type: 5 )
         long = value
     }
 }
 
-class CpEntryClassRef: CpEntryTemplate {
+class CpEntryClassRef: CpEntryTemplate {  // Class ref (7)
     var classNameIndex = 0
 
     init( index: Int16 ) {
@@ -138,6 +140,17 @@ class CpMethodType: CpEntryTemplate { // constant method type (16)
     init( index: Int16 ) {
         super.init( type: 16 )
         constantMethodIndex = Int(index)
+    }
+}
+
+class CpInvokedynamic: CpEntryTemplate { // invokedynamic (18)
+    var bootstrapIndex = 0
+    var nameAndTypeIndex = 0
+
+    init( bootstrap: Int16, nameAndType: Int16 ) {
+        super.init( type: 18 )
+        bootstrapIndex = Int(bootstrap)
+        nameAndTypeIndex = Int(nameAndType)
     }
 }
 
