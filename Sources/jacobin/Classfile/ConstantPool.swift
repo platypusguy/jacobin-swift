@@ -22,7 +22,7 @@ class ConstantPool {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
         let cpe = CpEntryTemplate()
         klass.cp.append( cpe ) // entry[0] is never used
-        for _ in 1...klass.constantPoolCount - 1 {
+        for i in 1...klass.constantPoolCount - 1 {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
             switch( cpeType ) {
@@ -59,6 +59,7 @@ class ConstantPool {
                 // longs take up two slots in the constant pool, of which the second slot is
                 // never accessed. So set up a dummy entry for that slot.
                 klass.cp.append( CpEntryTemplate() )
+                klass.constantPoolCount -= 1 // decrease the total number of entries to create due to dummy
                 byteCounter += 8
                 print( "Long constant: \( longValue )")
 
@@ -87,7 +88,7 @@ class ConstantPool {
                 let fieldRef : CpEntryFieldRef = CpEntryFieldRef( classIndex: classIndex,
                         nameAndTypeIndex: nameAndTypeIndex );
                 klass.cp.append( fieldRef )
-                print( "Field reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)")
+                print( "Field reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)" )
 
             case 10: // method reference
                 let classIndex =
@@ -98,7 +99,18 @@ class ConstantPool {
                 let methodRef : CpEntryMethodRef = CpEntryMethodRef( classIndex: classIndex,
                         nameAndTypeIndex: nameAndTypeIndex );
                 klass.cp.append( methodRef )
-                print( "Method reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)")
+                print( "Method reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)" )
+
+            case 11: // interface method reference
+                let classIndex =
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                let nameAndTypeIndex =
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                byteCounter += 4
+                let interfaceMethodRef : CpEntryInterfaceMethodRef =
+                        CpEntryInterfaceMethodRef( classIndex: classIndex, nameAndTypeIndex: nameAndTypeIndex );
+                klass.cp.append( interfaceMethodRef )
+                print( "Interface reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)" )
 
             case 12: // name and type info
                 let nameIndex =

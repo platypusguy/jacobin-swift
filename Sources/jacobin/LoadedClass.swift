@@ -79,6 +79,14 @@ class CpEntryFieldRef: CpEntryMethodRef {
     }
 }
 
+// Interface Method Reference has the same layout as a Method Reference
+class CpEntryInterfaceMethodRef: CpEntryMethodRef {
+    override init( classIndex : Int16, nameAndTypeIndex: Int16 ) {
+        super.init( type: 11 )
+        self.classIndex = Int(classIndex)
+        self.nameAndTypeIndex = Int(nameAndTypeIndex)
+    }
+}
 class CpEntryStringRef: CpEntryTemplate {
     var stringIndex = 0
 
