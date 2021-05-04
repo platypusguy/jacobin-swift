@@ -121,6 +121,17 @@ class CpEntryClassRef: CpEntryTemplate {
     }
 }
 
+class CpEntryMethodHandle: CpEntryTemplate { // method reference
+    var referenceKind = 0
+    var referenceIndex = 0
+
+    init( kind: UInt8, index: Int16 ) {
+        super.init( type: 15 )
+        referenceKind  = Int( kind )
+        referenceIndex = Int( index )
+    }
+}
+
 class CpEntryUTF8: CpEntryTemplate {
     var length = 0
     var string = ""

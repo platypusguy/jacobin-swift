@@ -123,6 +123,16 @@ class ConstantPool {
                 klass.cp.append( nameAndType )
                 print( "Name and type info: name index: \(nameIndex) descriptorIndex: \(descriptorIndex)")
 
+            case 15: // method handle
+                let methodKind  = klass.rawBytes[byteCounter+1]
+                let methodIndex =
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+2],
+                                                    lsb: klass.rawBytes[byteCounter+3] )
+                byteCounter += 3
+                let methodHandle = CpEntryMethodHandle( kind: methodKind, index: methodIndex )
+                klass.cp.append( methodHandle )
+                print( "Method handle kind: \(methodKind) index: \(methodIndex)" )
+
             default:
                 print( "** Unhandled constant pool entry found: \(cpeType)" )
                 break
