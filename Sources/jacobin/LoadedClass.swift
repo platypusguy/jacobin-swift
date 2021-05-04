@@ -96,6 +96,14 @@ class CpIntegerConstant: CpEntryTemplate {  // Constant Integer
     }
 }
 
+class CpLongConstant : CpEntryTemplate {  // Constant long
+    var long: Int64 = 0
+    init( value: Int64 ) {
+        super.init( type: 5 )
+        long = value
+    }
+}
+
 class CpEntryClassRef: CpEntryTemplate {
     var classNameIndex = 0
 

@@ -48,6 +48,20 @@ class ConstantPool {
                 byteCounter += 4
                 print( "Integer constant: \( value )" )
 
+            case 5: // long constant (fills two slots in the constant pool)
+                let highBytes =
+                        Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                let lowBytes =
+                        Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: byteCounter+5 )
+                let longValue : Int64 = Int64(( highBytes << 32) + lowBytes)
+                let longConstantEntry = CpLongConstant( value: longValue )
+                klass.cp.append( longConstantEntry )
+                // longs take up two slots in the constant pool, of which the second slot is
+                // never accessed. So set up a dummy entry for that slot.
+                klass.cp.append( CpEntryTemplate() )
+                byteCounter += 8
+                print( "Long constant: \( longValue )")
+
             case 7: // class reference
                 let classNameIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
