@@ -140,6 +140,15 @@ class ConstantPool {
                 klass.cp.append( methodHandle )
                 print( "Method handle kind: \(methodKind) index: \(methodIndex)" )
 
+            case 16: // constant method https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.9
+                let methodIndex =
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
+                                                    lsb: klass.rawBytes[byteCounter+2] )
+                byteCounter += 2
+                let constantMethod = CpMethodType( index: methodIndex )
+                klass.cp.append( constantMethod )
+                print( "Method type: \(methodIndex)" )
+
             default:
                 print( "** Unhandled constant pool entry found: \(cpeType)" )
                 break

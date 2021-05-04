@@ -121,7 +121,7 @@ class CpEntryClassRef: CpEntryTemplate {
     }
 }
 
-class CpEntryMethodHandle: CpEntryTemplate { // method reference
+class CpEntryMethodHandle: CpEntryTemplate { // method reference (15)
     var referenceKind = 0
     var referenceIndex = 0
 
@@ -129,6 +129,15 @@ class CpEntryMethodHandle: CpEntryTemplate { // method reference
         super.init( type: 15 )
         referenceKind  = Int( kind )
         referenceIndex = Int( index )
+    }
+}
+
+class CpMethodType: CpEntryTemplate { // constant method type (16)
+    var constantMethodIndex = 0
+
+    init( index: Int16 ) {
+        super.init( type: 16 )
+        constantMethodIndex = Int(index)
     }
 }
 
@@ -168,7 +177,6 @@ class Method {
         var catchType = 0
     }
     var exceptionTable : [ExceptionEntry] = []
-//    var lineNumTable : [LineNumberTable] = []
     var accessFlags: Int16 = 0
     typealias LineNumber = [Int]
     var lineNumTable : [LineNumber] = []
