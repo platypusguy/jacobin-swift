@@ -53,6 +53,8 @@ class ClassParser {
                 throw JVMerror.ClassFormatError( name: name + " constant pool count." )
             } else {
                 klass.constantPoolCount = cpCount
+                log.log( msg: "Class \(name) constant pool should have \(cpCount) entries",
+                         level: Logger.Level.FINEST )
             }
 
             // load and verify the constant pool

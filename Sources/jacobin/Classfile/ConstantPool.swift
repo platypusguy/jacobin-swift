@@ -22,13 +22,14 @@ class ConstantPool {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
         let cpe = CpEntryTemplate()
         klass.cp.append( cpe ) // entry[0] is never used
-        for i in 1...klass.constantPoolCount - 1 {
+        for _ in 1...klass.constantPoolCount - 1 {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
             switch( cpeType ) {
             case 1: // UTF-8 string
                 let length =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
+                                                    lsb: klass.rawBytes[byteCounter+2] )
                 byteCounter += 2
                 var buffer = [UInt8]()
                 for n in 0...Int(length-1)  {
@@ -65,7 +66,8 @@ class ConstantPool {
 
             case 7: // class reference
                 let classNameIndex =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
+                                                    lsb: klass.rawBytes[byteCounter+2] )
                 let classNameRef = CpEntryClassRef( index: classNameIndex )
                 klass.cp.append( classNameRef )
                 byteCounter += 2
@@ -73,7 +75,8 @@ class ConstantPool {
 
             case 8: // string reference
                 let stringIndex =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
+                                                    lsb: klass.rawBytes[byteCounter+2] )
                 let stringRef = CpEntryStringRef( index: stringIndex )
                 klass.cp.append( stringRef )
                 byteCounter += 2
@@ -81,9 +84,11 @@ class ConstantPool {
 
             case  9: // field reference
                 let classIndex =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
+                                                    lsb: klass.rawBytes[byteCounter+2] )
                 let nameAndTypeIndex =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3],
+                                                    lsb: klass.rawBytes[byteCounter+4] )
                 byteCounter += 4
                 let fieldRef : CpEntryFieldRef = CpEntryFieldRef( classIndex: classIndex,
                         nameAndTypeIndex: nameAndTypeIndex );
@@ -92,12 +97,14 @@ class ConstantPool {
 
             case 10: // method reference
                 let classIndex =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
+                                                    lsb: klass.rawBytes[byteCounter+2] )
                 let nameAndTypeIndex =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
+                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3],
+                                                    lsb: klass.rawBytes[byteCounter+4] )
                 byteCounter += 4
-                let methodRef : CpEntryMethodRef = CpEntryMethodRef( classIndex: classIndex,
-                        nameAndTypeIndex: nameAndTypeIndex );
+                let methodRef = CpEntryMethodRef( classIndex: classIndex,
+                                                  nameAndTypeIndex: nameAndTypeIndex );
                 klass.cp.append( methodRef )
                 print( "Method reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)" )
 
