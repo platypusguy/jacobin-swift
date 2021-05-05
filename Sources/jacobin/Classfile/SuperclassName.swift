@@ -22,7 +22,7 @@ class SuperClassName {
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
         if( klass.cp[superClassRef].type != 7 &&  // must point to valid class unless this class is Object.class
-                         klass.shortName != "java/lang/Object") {
+                         klass.shortName != "java/lang/Object" ) {
             jacobin.log.log( msg: "ClassFormatError in \( klass.path ): Invalid superClassReference",
                              level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
@@ -31,10 +31,15 @@ class SuperClassName {
 
     // looks up the pointed-to name for the superclass and inserts it into klass.shortName; and logs it
     static func process( klass: LoadedClass ){
-        let cRef : CpEntryClassRef = klass.cp[superClassRef] as! CpEntryClassRef
-        let pointerToName = cRef.classNameIndex
-        let superNameEntry : CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
-        klass.superClassName = superNameEntry.string
+        if klass.shortName == "java/lang/Object" {
+            klass.superClassName = ""
+        }
+        else {
+            let cRef: CpEntryClassRef = klass.cp[superClassRef] as! CpEntryClassRef
+            let pointerToName = cRef.classNameIndex
+            let superNameEntry: CpEntryUTF8 = klass.cp[pointerToName] as! CpEntryUTF8
+            klass.superClassName = superNameEntry.string
+        }
     }
 
     // log the name of the superclass (Mostly used for diagnostic purposes)
