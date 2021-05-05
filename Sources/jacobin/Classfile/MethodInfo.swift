@@ -86,8 +86,12 @@ class MethodInfo {
             currLocation =
                 codeAttr.load( klass, location: currLocation, methodData: methodData )
         }
-        else if attrName == "Signature" {
-
+        else if attrName == "Signature" { // not enforced by the JVM, so skipped here
+                /*Signature_attribute {
+                u2 attribute_name_index; (already read)
+                u4 attribute_length;     (already read)
+                u2 signature_index;      (skip over this) */
+            currLocation += 2
         }
 
         return( currLocation )
