@@ -20,9 +20,10 @@ class ConstantPool {
     // TODO: Adding the remaining entry types for the class constant pool
     static func load( klass: LoadedClass ) -> Int {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
-        let cpe = CpEntryTemplate()
-        klass.cp.append( cpe ) // entry[0] is never used
-        for _ in 1...klass.constantPoolCount - 1 {
+        let cpe = CpEntryTemplate( type: -1 )
+        klass.cp.append( cpe ) // entry[0] is a dummy entry that's never used
+        var i = 1
+        while( i <= klass.constantPoolCount-1 ) {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
             switch( cpeType ) {
@@ -33,7 +34,7 @@ class ConstantPool {
                 byteCounter += 2
                 var buffer = [UInt8]()
                 for n in 0...Int(length-1)  {
-                    buffer.append(klass.rawBytes[byteCounter+n+1])
+                    buffer.append( klass.rawBytes[byteCounter+n+1] )
                 }
                 let UTF8string = String(bytes: buffer, encoding: String.Encoding.utf8 ) ?? ""
                 let UTF8entry = CpEntryUTF8( contents: UTF8string )
@@ -59,7 +60,7 @@ class ConstantPool {
                 klass.cp.append( longConstantEntry )
                 // longs take up two slots in the constant pool, of which the second slot is
                 // never accessed. So set up a dummy entry for that slot.
-                klass.cp.append( CpEntryTemplate() )
+                klass.cp.append( CpEntryTemplate( type: -1 ) )
                 klass.constantPoolCount -= 1 // decrease the total number of entries to create due to dummy
                 byteCounter += 8
                 print( "Long constant: \( longValue )" )
@@ -164,9 +165,10 @@ class ConstantPool {
                 print( "Invokedynamic boostrap idx: \(bootstrapIndex), name and type: \(nameAndTypeIndex)" )
 
             default:
-                print( "** Unhandled constant pool entry found: \(cpeType)" )
+                print( "** Unhandled constant pool entry found: \(cpeType) at byte \(byteCounter)" )
                 break
             }
+        i += 1
         }
         return byteCounter
     }
@@ -175,6 +177,8 @@ class ConstantPool {
     static func verify( klass: LoadedClass, klassName: String ) {
         for n in 1...klass.constantPoolCount - 1 {
             switch ( klass.cp[n].type ) {
+            case -1: // dummy entries created by the JVM ( for 0th element, longs, doubles, etc.)
+                continue
             case 1: //UTF8 string
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let currEntry = currTemp as! CpEntryUTF8
