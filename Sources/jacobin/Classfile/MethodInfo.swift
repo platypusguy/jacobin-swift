@@ -52,14 +52,15 @@ class MethodInfo {
         // get the count of attributes
         let attrCount = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[presentLocation + 1],
                                                          lsb: klass.rawBytes[presentLocation + 2] ))
-//        methodData.attributeCount = attrCount
         presentLocation += 2
 
         // get the attributes
-        for _ in 0...attrCount-1 {
-            var attr = Attribute()
-            presentLocation = fillInAttribute( klass: klass, location: presentLocation )
-  //          methodData.attributes.append( attr )
+        if attrCount > 0 {
+            for _ in 0...attrCount - 1 {
+                var attr = Attribute()
+                presentLocation = fillInAttribute( klass: klass, location: presentLocation )
+                //          methodData.attributes.append( attr )
+            }
         }
         return presentLocation
     }
@@ -84,6 +85,9 @@ class MethodInfo {
             codeAttr.attrLength = attrLength
             currLocation =
                 codeAttr.load( klass, location: currLocation, methodData: methodData )
+        }
+        else if attrName == "Signature" {
+
         }
 
         return( currLocation )
