@@ -22,19 +22,6 @@ class CodeAttribute: Attribute {
     u2 attributes_count;
     attribute_info attributes[attributes_count];
      */
-//    var maxStack = 0
-//    var maxLocals = 0
-//    var codeLength = 0
-//    var code : [UInt8] = []
-//    var exceptionTableLength = 0
-//    struct ExceptionEntry {
-//        var startPc = 0
-//        var handlerPc = 0
-//        var catchType = 0
-//    }
-//    var exceptionTable : [ExceptionEntry] = []
-//    var lineNumTable : [LineNumberTable] = []
-
 
     /// read the code attribute and load the items into the class fields
     /// - parameter klass: the bytes we're parsing
@@ -56,7 +43,7 @@ class CodeAttribute: Attribute {
 
         // get the length of the codebyte array
         let codeLength = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLoc+1 )
-        print( "Class \(klass.path) size of bytecode: \(codeLength)")
+        print( "Class \(klass.shortName), Method \(methodData.name), size of bytecode: \(codeLength)" )
         currLoc += 4
 
         // load the bytecode into code array
@@ -71,7 +58,7 @@ class CodeAttribute: Attribute {
                 Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
                                                  lsb: klass.rawBytes[currLoc + 2] ))
         currLoc += 2
-        print( "Class \(klass.path) exception table length: \(exceptionTableLength)" )
+        print( "Class \(klass.shortName), Method \(methodData.name), exception table length: \(exceptionTableLength)" )
 
         //TODO: add handling of exception table when there is one
 
@@ -79,7 +66,7 @@ class CodeAttribute: Attribute {
         let codeAttrCount =
                 Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
         currLoc += 2
-        print( "Class\(klass.path) code attribute count: \(codeAttrCount)" )
+        print( "Class \(klass.shortName), Method \(methodData.name), code attribute count: \(codeAttrCount)" )
 
         let lnt = LineNumberTable()
 
@@ -91,7 +78,7 @@ class CodeAttribute: Attribute {
 
             let codeAttrName =
                     Utility.getUTF8stringFromConstantPoolIndex( klass:klass, index: codeAttrNamePointer )
-            print( "Class\(klass.path), code attribute: \(codeAttrName)" )
+            print( "Class \(klass.shortName), Method \(methodData.name), code attribute: \(codeAttrName)" )
 
 
             if codeAttrName == "LineNumberTable" {
@@ -103,6 +90,14 @@ class CodeAttribute: Attribute {
                     methodData.lineNumTable.append( entry )
                 }
             }
+            else if codeAttrName == "StackMapTable" {
+                let length = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
+                currLoc += 4
+                currLoc += length
+                print( "Class \(klass.shortName), Method \(methodData.name), stack map table length: \(length)" )
+            }
+
+            // CURR: Handle stackmap table and test with Object.class
         }
 
         for i in 0...lnt.entryCount-1 {

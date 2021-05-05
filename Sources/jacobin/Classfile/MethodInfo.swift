@@ -76,7 +76,7 @@ class MethodInfo {
         let length = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLocation+1 )
         let attrLength = Int(length)
 
-        print( "\(attrName) attribute length: \(length) at location \(currLocation)" )
+        print( "\(attrName) attribute -> length: \(length) at location \(currLocation)" )
         currLocation += 4
 
         if attrName == "Code" {
