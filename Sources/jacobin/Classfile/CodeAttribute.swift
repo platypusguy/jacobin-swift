@@ -97,7 +97,7 @@ class CodeAttribute: Attribute {
                 print( "Class \(klass.shortName), Method \(methodData.name), stack map table length: \(length)" )
             }
 
-            // CURR: Handle stackmap table and test with Object.class
+            // CURR: Handle Exception attribute
         }
 
         for i in 0...lnt.entryCount-1 {
