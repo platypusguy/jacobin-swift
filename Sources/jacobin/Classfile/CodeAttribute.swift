@@ -80,7 +80,6 @@ class CodeAttribute: Attribute {
                     Utility.getUTF8stringFromConstantPoolIndex( klass:klass, index: codeAttrNamePointer )
             print( "Class \(klass.shortName), Method \(methodData.name), code attribute: \(codeAttrName)" )
 
-
             if codeAttrName == "LineNumberTable" {
                 currLoc = lnt.load( klass: klass.rawBytes, loc: currLoc )
                 for i in 0...lnt.entryCount-1 {
@@ -90,14 +89,12 @@ class CodeAttribute: Attribute {
                     methodData.lineNumTable.append( entry )
                 }
             }
-            else if codeAttrName == "StackMapTable" {
+            else if codeAttrName == "StackMapTable" { //skip over it for the nonce
                 let length = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
                 currLoc += 4
                 currLoc += length
                 print( "Class \(klass.shortName), Method \(methodData.name), stack map table length: \(length)" )
             }
-
-            // CURR: Handle Exception attribute
         }
 
         for i in 0...lnt.entryCount-1 {

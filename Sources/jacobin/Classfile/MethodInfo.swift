@@ -86,6 +86,12 @@ class MethodInfo {
             currLocation =
                 codeAttr.load( klass, location: currLocation, methodData: methodData )
         }
+        else if attrName == "Exceptions" { // skipped for the nonce
+            let count = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: currLocation+1 )
+            currLocation += 2
+            print( "Class \(klass.shortName), Method \(methodData.name), # of exceptions: \(count)" )
+            currLocation += length-2
+        }
         else if attrName == "Signature" { // not enforced by the JVM, so skipped here
                 /*Signature_attribute {
                 u2 attribute_name_index; (already read)
@@ -93,6 +99,7 @@ class MethodInfo {
                 u2 signature_index;      (skip over this) */
             currLocation += 2
         }
+
 
         return( currLocation )
     }
