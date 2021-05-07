@@ -57,7 +57,7 @@ class MethodInfo {
         // get the attributes
         if attrCount > 0 {
             for _ in 0...attrCount - 1 {
-                var attr = Attribute()
+//                var attr = Attribute( name: <#String#>, length: <#Int#>)
                 presentLocation = fillInAttribute( klass: klass, location: presentLocation )
                 //          methodData.attributes.append( attr )
             }
@@ -81,17 +81,15 @@ class MethodInfo {
 
         switch( attrName ) {
         case "Code":
-            let codeAttr = CodeAttribute()
-            codeAttr.attrName = attrName
-            codeAttr.attrLength = attrLength
+            let codeAttr = CodeAttribute( name: attrName, length: attrLength)
             currLocation =
                     codeAttr.load( klass, location: currLocation, methodData: methodData )
 
-        case "Exceptions": // skipped for the nonce
-            let count = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLocation + 1 )
-            currLocation += 2
-            print( "Class \(klass.shortName), Method \(methodData.name), # of exceptions: \(count)" )
-            currLocation += length - 2
+        case "Exceptions": // record the # of exceptions, but don't add to method yet
+            let exceptionsAttr = ExceptionsAttribute( name: attrName, length: attrLength )
+            exceptionsAttr.load( klass: klass, loc: currLocation )
+            exceptionsAttr.log( klass: klass, method: methodData )
+            currLocation += attrLength
 
         case "Signature":  // not enforced by the JVM, so skipped here
             /*Signature_attribute {

@@ -12,6 +12,11 @@ import Foundation
 class Attribute {
     var attrName = ""
     var attrLength = 0
+
+    init( name: String, length: Int ){
+        attrName = name
+        attrLength = length
+    }
 }
 
 class AttributeInfo: Attribute {
