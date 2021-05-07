@@ -50,16 +50,13 @@ class MethodInfo {
         presentLocation += 2
 
         // get the count of attributes
-        let attrCount = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[presentLocation + 1],
-                                                         lsb: klass.rawBytes[presentLocation + 2] ))
+        let attrCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: presentLocation+1 )
         presentLocation += 2
 
         // get the attributes
         if attrCount > 0 {
             for _ in 0...attrCount - 1 {
-//                var attr = Attribute( name: <#String#>, length: <#Int#>)
                 presentLocation = fillInAttribute( klass: klass, location: presentLocation )
-                //          methodData.attributes.append( attr )
             }
         }
         return presentLocation
@@ -92,11 +89,8 @@ class MethodInfo {
             currLocation += attrLength
 
         case "Signature":  // not enforced by the JVM, so skipped here
-            /*Signature_attribute {
-                u2 attribute_name_index; (already read)
-                u4 attribute_length;     (already read)
-                u2 signature_index;      (skip over this) */
             currLocation += 2
+
         default:
             print( "Attribute \(attrName) not handled in MethodInfo.swift" )
         }

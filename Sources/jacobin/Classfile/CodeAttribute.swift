@@ -7,6 +7,9 @@
 
 import Foundation
 
+/// handles the comparatively complex processing of the code for a given method
+/// as well as the attributes associated with that code. Details here:
+/// https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.7.3
 class CodeAttribute: Attribute {
     /**
     u2 max_stack;
@@ -31,14 +34,13 @@ class CodeAttribute: Attribute {
     func load(_ klass: LoadedClass, location: Int, methodData: Method ) -> Int {
 
         var currLoc = location
-        methodData.maxStack = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
-                                                               lsb: klass.rawBytes[currLoc + 2] ))
-
+        methodData.maxStack =
+                Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc+1 )
         currLoc += 2
 
         // get the maximum # of locals
-        methodData.maxLocals = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
-                                                                lsb: klass.rawBytes[currLoc + 2] ))
+        methodData.maxLocals =
+                Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc+1 )
         currLoc += 2
 
         // get the length of the codebyte array
@@ -48,15 +50,14 @@ class CodeAttribute: Attribute {
 
         // load the bytecode into code array
         for i in 1...codeLength {
-            methodData.code.append( klass.rawBytes[currLoc+i])
+            methodData.code.append( klass.rawBytes[currLoc+i] )
         }
         currLoc += codeLength
-        print( "location: \(currLoc)")
+        print( "location: \(currLoc)" )
 
         // get exception table length (= number of entries, rather than length in bytes)
         let exceptionTableLength =
-                Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[currLoc + 1],
-                                                 lsb: klass.rawBytes[currLoc + 2] ))
+                Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc+1 )
         currLoc += 2
         print( "Class \(klass.shortName), Method \(methodData.name), exception table length: \(exceptionTableLength)" )
 
