@@ -79,27 +79,29 @@ class MethodInfo {
         print( "\(attrName) attribute -> length: \(length) at location \(currLocation)" )
         currLocation += 4
 
-        if attrName == "Code" {
+        switch( attrName ) {
+        case "Code":
             let codeAttr = CodeAttribute()
             codeAttr.attrName = attrName
             codeAttr.attrLength = attrLength
             currLocation =
-                codeAttr.load( klass, location: currLocation, methodData: methodData )
-        }
-        else if attrName == "Exceptions" { // skipped for the nonce
-            let count = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: currLocation+1 )
+                    codeAttr.load( klass, location: currLocation, methodData: methodData )
+
+        case "Exceptions": // skipped for the nonce
+            let count = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLocation + 1 )
             currLocation += 2
             print( "Class \(klass.shortName), Method \(methodData.name), # of exceptions: \(count)" )
-            currLocation += length-2
-        }
-        else if attrName == "Signature" { // not enforced by the JVM, so skipped here
-                /*Signature_attribute {
+            currLocation += length - 2
+
+        case "Signature":  // not enforced by the JVM, so skipped here
+            /*Signature_attribute {
                 u2 attribute_name_index; (already read)
                 u4 attribute_length;     (already read)
                 u2 signature_index;      (skip over this) */
             currLocation += 2
+        default:
+            print( "Attribute \(attrName) not handled in MethodInfo.swift" )
         }
-
 
         return( currLocation )
     }
