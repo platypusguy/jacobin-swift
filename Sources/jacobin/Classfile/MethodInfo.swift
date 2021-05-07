@@ -65,8 +65,7 @@ class MethodInfo {
     // gets the attribute data and puts it into the methodData structure
     private func fillInAttribute( klass: LoadedClass, location: Int ) -> Int {
         var currLocation = location
-        let attrNameIdx = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[location + 1],
-                                                           lsb: klass.rawBytes[location + 2] ))
+        let attrNameIdx = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: location + 1 )
         let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
         currLocation += 2;
 
@@ -76,7 +75,7 @@ class MethodInfo {
         print( "\(attrName) attribute -> length: \(length) at location \(currLocation)" )
         currLocation += 4
 
-        switch( attrName ) {
+        switch( attrName ) { // listed alphabetically
         case "Code":
             let codeAttr = CodeAttribute( name: attrName, length: attrLength)
             currLocation =
@@ -86,6 +85,13 @@ class MethodInfo {
             let exceptionsAttr = ExceptionsAttribute( name: attrName, length: attrLength )
             exceptionsAttr.load( klass: klass, loc: currLocation )
             exceptionsAttr.log( klass: klass, method: methodData )
+            currLocation += attrLength
+
+        case "MethodParameters":
+            let methodParmsAttr = MethodParmsAttribute( name: attrName, length: attrLength )
+            methodParmsAttr.load( klass: klass, loc: currLocation )
+            methodData.parameters = methodParmsAttr.parms
+            methodParmsAttr.log( klass: klass, method: methodData )
             currLocation += attrLength
 
         case "Signature":  // not enforced by the JVM, so skipped here

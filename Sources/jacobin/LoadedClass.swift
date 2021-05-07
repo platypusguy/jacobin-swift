@@ -193,5 +193,6 @@ class Method {
     var accessFlags: Int16 = 0
     typealias LineNumber = [Int]
     var lineNumTable : [LineNumber] = []
+    var parameters: [MethodParm] = []
 }
 
