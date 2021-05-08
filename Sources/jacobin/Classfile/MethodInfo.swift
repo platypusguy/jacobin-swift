@@ -6,7 +6,7 @@
  */
 import Foundation
 
-// reads, and loads into the class, method info and verifies it
+/// reads, and loads into the class, method info and verifies it
 /**
 method_info {
     u2             access_flags;
@@ -39,7 +39,7 @@ class MethodInfo {
 
         // get the descriptor index, which should point to a UTF8 entry, then get the UTF8 name string
         let descIndex = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[presentLocation + 1],
-                                                        lsb: klass.rawBytes[presentLocation + 2] ))
+                                                         lsb: klass.rawBytes[presentLocation + 2] ))
         cpEntry = klass.cp[descIndex]
         if cpEntry.type != 1 {
             jacobin.log.log( msg: "Error: Class: \(klass.path) - method desc index \(descIndex) invalid",
@@ -50,20 +50,20 @@ class MethodInfo {
         presentLocation += 2
 
         // get the count of attributes
-        let attrCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: presentLocation+1 )
+        methodData.attributeCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: presentLocation+1 )
         presentLocation += 2
 
         // get the attributes
-        if attrCount > 0 {
-            for _ in 0...attrCount - 1 {
-                presentLocation = fillInAttribute( klass: klass, location: presentLocation )
+        if methodData.attributeCount > 0 {
+            for _ in 0...methodData.attributeCount - 1 {
+                presentLocation = processAttribute( klass: klass, location: presentLocation )
             }
         }
         return presentLocation
     }
 
-    // gets the attribute data and puts it into the methodData structure
-    private func fillInAttribute( klass: LoadedClass, location: Int ) -> Int {
+    /// handle any attributes of method_info structures
+    private func processAttribute( klass: LoadedClass, location: Int ) -> Int {
         var currLocation = location
         let attrNameIdx = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: location + 1 )
         let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIdx )
@@ -131,10 +131,10 @@ class MethodInfo {
                          level: Logger.Level.FINEST )
         jacobin.log.log( msg: "Method: \( methodData.name ) - description: \( methodData.descriptor )",
                 level: Logger.Level.FINEST )
-        jacobin.log.log( msg: "Method: \(methodData.name) - bytecode length: \(methodData.code.count)",
+        jacobin.log.log( msg: "Method: \( methodData.name ) - bytecode length: \(methodData.code.count)",
                          level: Logger.Level.FINEST )
-//        jacobin.log.log( msg: "Class: \( klass.path ) - # of attributes: \( methodData.attributeCount )",
-//                level: Logger.Level.FINEST )
+        jacobin.log.log( msg: "Method: \( methodData.name ) - has: \( methodData.attributeCount ) attribute(s)",
+                level: Logger.Level.FINEST )
 
     }
 

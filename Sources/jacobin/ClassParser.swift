@@ -105,7 +105,6 @@ class ClassParser {
             for i in 0...( klass.methodCount - 1 ) {
                 let mi = MethodInfo()
                 location = mi.read( klass: klass, location: location )
-//                mi.verify( klass: klass, index: i )
                 mi.log( klass: klass, index: i )
                 klass.methodInfo.append( mi.methodData )
             }
