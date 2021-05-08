@@ -195,5 +195,6 @@ class Method {
     var lineNumTable : [LineNumber] = []
     var parameters: [MethodParm] = []
     var deprecated = false
+    var synthetic = false
 }
 

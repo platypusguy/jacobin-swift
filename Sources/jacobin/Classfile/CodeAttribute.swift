@@ -26,6 +26,9 @@ class CodeAttribute: Attribute {
     attribute_info attributes[attributes_count];
      */
 
+    // Todo: skip over debugging attributes such as:
+    // https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.7.14
+
     /// read the code attribute and load the items into the class fields
     /// - parameter klass: the bytes we're parsing
     /// - location: where we are in the klass bytes

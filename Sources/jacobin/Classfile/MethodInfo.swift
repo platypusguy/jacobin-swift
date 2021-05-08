@@ -76,6 +76,10 @@ class MethodInfo {
         currLocation += 4
 
         switch( attrName ) { // listed alphabetically
+
+        case "AnnotationDefault": // not currently handling annotations, so skip for the nonce
+            currLocation += attrLength
+
         case "Code":
             let codeAttr = CodeAttribute( name: attrName, length: attrLength)
             currLocation =
@@ -99,11 +103,24 @@ class MethodInfo {
             methodParmsAttr.log( klass: klass, method: methodData )
             currLocation += attrLength
 
+        case "RuntimeInvisibleAnnotations", // not used by Jacobin at present, so skipped here
+             "RuntimeInvisibleParameterAnnotations ",
+             "RuntimeInvisibleTypeAnnotations",
+             "RuntimeVisibleAnnotations",
+             "RuntimeVisibleParameterAnnotations",
+             "RuntimeVisibleTypeAnnotations":
+            currLocation += attrLength
+
         case "Signature":  // not enforced by the JVM, so skipped here
             currLocation += 2
 
-        default:
-            print( "Attribute \(attrName) not handled in MethodInfo.swift" )
+        case "Synthetic": // method is synthetic (created by the compiler, but not in the source)
+            methodData.synthetic = true
+
+        default: // The JVM spec allows vendor-specific attributes, which can be ignored
+            jacobin.log.log( msg: "Encountered unknown attribute \(attrName) in method: \(methodData.name)",
+                             level: Logger.Level.INFO )
+            currLocation += attrLength
         }
 
         return( currLocation )
@@ -112,9 +129,9 @@ class MethodInfo {
     func log( klass: LoadedClass, index: Int ) {
         jacobin.log.log( msg: "Class: \( klass.path ) - method name: \( methodData.name )",
                          level: Logger.Level.FINEST )
-        jacobin.log.log( msg: "Class: \( klass.path ) - description: \( methodData.descriptor )",
+        jacobin.log.log( msg: "Method: \( methodData.name ) - description: \( methodData.descriptor )",
                 level: Logger.Level.FINEST )
-        jacobin.log.log( msg: "Method: \(methodData.name) bytecode length: \(methodData.code.count)",
+        jacobin.log.log( msg: "Method: \(methodData.name) - bytecode length: \(methodData.code.count)",
                          level: Logger.Level.FINEST )
 //        jacobin.log.log( msg: "Class: \( klass.path ) - # of attributes: \( methodData.attributeCount )",
 //                level: Logger.Level.FINEST )
