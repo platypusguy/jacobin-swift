@@ -126,7 +126,7 @@ class MethodInfo {
         return( currLocation )
     }
 
-    func log( klass: LoadedClass, index: Int ) {
+    func log( klass: LoadedClass ) {
         jacobin.log.log( msg: "Class: \( klass.path ) - method name: \( methodData.name )",
                          level: Logger.Level.FINEST )
         jacobin.log.log( msg: "Method: \( methodData.name ) - description: \( methodData.descriptor )",
