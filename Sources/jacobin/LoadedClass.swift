@@ -16,12 +16,13 @@ class LoadedClass {
     var version = 0
     var constantPoolCount = 0
     var assertionStatus = globals.assertionStatus
-    var cp = [CpEntryTemplate]()
+    var cp = [CpEntryTemplate]()  // cp = constant pool
     var accessMask = 0
     var shortName = ""
     var superClassName = ""
     var interfaceCount = 0
     var fieldCount = 0
+    var fieldInfo: [Field] = []
     var methodCount = 0
     var methodInfo : [Method] = []
 

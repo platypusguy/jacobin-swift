@@ -90,12 +90,15 @@ class ClassParser {
 
             //**Eventually: add handling of interfaces, when count > 0
 
-            // get the count of fields in this class
+            // get the count of fields in this class, put it into klass.fieldCount
             FieldCount.readFieldCount( klass: klass, location: location )
             FieldCount.log( klass: klass )
             location += 2
 
-            //**Eventually: add handling of fields , when count > 0
+            for i in 0...klass.fieldCount {
+                let field = Field()
+                //curr: add field_info processing
+            }
 
             // get the count of methods in this class
             MethodCount.readMethodCount( klass: klass, location: location )
@@ -105,7 +108,7 @@ class ClassParser {
             for i in 0...( klass.methodCount - 1 ) {
                 let mi = MethodInfo()
                 location = mi.read( klass: klass, location: location )
-                mi.log( klass: klass, index: i )
+                mi.log( klass: klass )
                 klass.methodInfo.append( mi.methodData )
             }
         }
