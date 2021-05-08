@@ -194,5 +194,6 @@ class Method {
     typealias LineNumber = [Int]
     var lineNumTable : [LineNumber] = []
     var parameters: [MethodParm] = []
+    var deprecated = false
 }
 

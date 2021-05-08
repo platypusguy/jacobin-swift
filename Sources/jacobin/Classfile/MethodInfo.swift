@@ -81,6 +81,11 @@ class MethodInfo {
             currLocation =
                     codeAttr.load( klass, location: currLocation, methodData: methodData )
 
+        case "Deprecated": // if present, this method is deprecated
+            methodData.deprecated = true
+            jacobin.log.log( msg: "Class: \(klass.shortName), method name \(methodData.name) is deprecated",
+                             level: Logger.Level.FINEST )
+
         case "Exceptions": // record the # of exceptions, but don't add to method yet
             let exceptionsAttr = ExceptionsAttribute( name: attrName, length: attrLength )
             exceptionsAttr.load( klass: klass, loc: currLocation )
