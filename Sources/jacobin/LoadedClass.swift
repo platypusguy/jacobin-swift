@@ -25,6 +25,7 @@ class LoadedClass {
     var fieldInfo: [Field] = []
     var methodCount = 0
     var methodInfo : [Method] = []
+    var attributes : [Attribute] = []
 
     var classIsPublic      = false
     var classIsFinal       = false

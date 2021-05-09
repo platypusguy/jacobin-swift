@@ -111,6 +111,30 @@ class ClassParser {
                 mi.log( klass: klass )
                 klass.methodInfo.append( mi.methodData )
             }
+
+            // get any remaining attributes
+            while location < klass.rawBytes.count-1 {
+                let attributeID = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: location+1 )
+                let attrName =
+                    Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attributeID )
+                location += 2
+                let attrSize =
+                        Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: location+1 )
+                location += 4
+
+                switch attrName {
+                case "SourceFile":
+                    let sfa = SourceFileAttribute( name: attrName, length: attrSize )
+                    sfa.load( klass: klass, loc: location )
+                    klass.attributes.append( sfa )
+                    sfa.log( className: klass.shortName )
+                    location += 2
+
+                default:
+                    print( "Attribute: \(attrName) not processed in class \(klass.shortName)" )
+                    location += attrSize
+                }
+            }
         }
         catch JVMerror.ClassFormatError( name: klass.path ) {
             log.log( msg: "ClassFormatError in \(name)", level: Logger.Level.SEVERE )

@@ -93,17 +93,21 @@ class CodeAttribute: Attribute {
                     methodData.lineNumTable.append( entry )
                 }
             }
-            else if codeAttrName == "StackMapTable" { //skip over it for the nonce
+            else  { //skip over the other code attributes for the nonce
                 let length = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
                 currLoc += 4
                 currLoc += length
-                print( "Class \(klass.shortName), Method \(methodData.name), stack map table length: \(length)" )
+//                if codeAttrName == "StackMapTable" {
+//                    currLoc += 2
+//                }
+                print( "Class \(klass.shortName), Method \(methodData.name), Code attribute: \( codeAttrName ), length: \(length)" )
+                print( "location after attribute: \( currLoc )" )
             }
         }
 
-        for i in 0...lnt.entryCount-1 {
-            print( "line # table entry: pc > \(methodData.lineNumTable[i][0]) line # > \(methodData.lineNumTable[i][1])")
-        }
+//        for i in 0...lnt.entryCount-1 {
+//            print( "line # table entry: pc > \(methodData.lineNumTable[i][0]) line # > \(methodData.lineNumTable[i][1])")
+//        }
         return currLoc
     }
 }
