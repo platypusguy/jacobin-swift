@@ -81,9 +81,9 @@ class MethodInfo {
             currLocation += attrLength
 
         case "Code":
-            let codeAttr = CodeAttribute( name: attrName, length: attrLength)
-            currLocation =
-                    codeAttr.load( klass, location: currLocation, methodData: methodData )
+            let codeAttr = CodeAttribute( name: attrName, length: attrLength )
+            codeAttr.load( klass, location: currLocation, methodData: methodData )
+            currLocation += attrLength
 
         case "Deprecated": // if present, this method is deprecated
             methodData.deprecated = true

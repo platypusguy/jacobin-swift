@@ -112,8 +112,11 @@ class ClassParser {
                 klass.methodInfo.append( mi.methodData )
             }
 
+            let attrCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: location+1 )
+            location += 2
+
             // get any remaining attributes
-            while location < klass.rawBytes.count-1 {
+            for _ in 1...attrCount  {
                 let attributeID = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: location+1 )
                 let attrName =
                     Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attributeID )

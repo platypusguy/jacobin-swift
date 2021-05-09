@@ -22,7 +22,7 @@ class LoadedClass {
     var superClassName = ""
     var interfaceCount = 0
     var fieldCount = 0
-    var fieldInfo: [Field] = []
+    var fields: [Field] = []
     var methodCount = 0
     var methodInfo : [Method] = []
     var attributes : [Attribute] = []
