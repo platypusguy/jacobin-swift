@@ -95,9 +95,12 @@ class ClassParser {
             FieldCount.log( klass: klass )
             location += 2
 
-            for i in 0...klass.fieldCount {
-                let field = Field()
-                //curr: add field_info processing
+            if klass.fieldCount > 0  {
+                for i in 1...klass.fieldCount {
+                    let field = Field()
+                    location = field.load( klass: klass, location: location )
+                    klass.fields.append( field )
+                }
             }
 
             // get the count of methods in this class
@@ -105,11 +108,13 @@ class ClassParser {
             MethodCount.log( klass: klass )
             location += 2
 
-            for i in 0...( klass.methodCount - 1 ) {
-                let mi = MethodInfo()
-                location = mi.read( klass: klass, location: location )
-                mi.log( klass: klass )
-                klass.methodInfo.append( mi.methodData )
+            if klass.methodCount > 0 {
+                for i in 1...( klass.methodCount ) {
+                    let mi = MethodInfo()
+                    location = mi.read( klass: klass, location: location )
+                    mi.log( klass: klass )
+                    klass.methodInfo.append( mi.methodData )
+                }
             }
 
             let attrCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: location+1 )
