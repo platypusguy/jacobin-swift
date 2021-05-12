@@ -18,25 +18,24 @@ class Utility {
 
     // converts two successive bytes into an Int
     static func getIntFrom2Bytes( bytes: [UInt8], index: Int ) -> Int {
-        Int(Int((bytes[index]))*256) + Int( bytes[index+1] )
+        Int(Int( bytes[index] )*256 ) + Int( bytes[index+1] )
     }
 
     // converts four successive bytes into an Int. Note index points to first byte.
     static func getIntfrom4Bytes( bytes: [UInt8], index: Int ) -> Int {
         var loc = index
-        let i1 = getIntFrom2Bytes(bytes: bytes, index: loc )
+        let i1 = getIntFrom2Bytes( bytes: bytes, index: loc )
         loc += 2
-        let i2 = getIntFrom2Bytes(bytes: bytes, index: loc )
+        let i2 = getIntFrom2Bytes( bytes: bytes, index: loc )
         return(( i1 * 65536 ) + i2 )
-//        Int( getInt32from4Bytes( byte1: bytes[index],   byte2: bytes[index+1],
-//                                 byte3: bytes[index+2], byte4: bytes[index+3] ))
     }
+
     // converts four bytes into a 32-bit integer
     static func getInt32from4Bytes( byte1: UInt8, byte2: UInt8,
-                                    byte3: UInt8, byte4: UInt8) -> Int32 {
+                                    byte3: UInt8, byte4: UInt8 ) -> Int32 {
         let firstBytes = getInt16from2Bytes( msb: byte1, lsb: byte2 )
         let lastBytes  = getInt16from2Bytes( msb: byte3, lsb: byte4 )
-        return (( Int32(firstBytes) * 65536 ) + ( Int32( lastBytes )))
+        return (( Int32( firstBytes ) * 65536 ) + ( Int32( lastBytes )))
     }
 
     // returns a UTF8 string pointed to by an index into the constant pool
@@ -44,7 +43,7 @@ class Utility {
         let cpEntry = klass.cp[index]
         if cpEntry.type != ConstantPool.RecType.UTF8 {
             jacobin.log.log( msg: "Error: Class: \(klass.path) - invalid UTF8 index \(index)",
-                    level: Logger.Level.FINEST )
+                             level: Logger.Level.FINEST )
         }
         let UTF8entry = cpEntry as! CpEntryUTF8
         return UTF8entry.string

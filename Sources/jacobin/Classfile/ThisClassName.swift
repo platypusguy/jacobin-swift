@@ -22,7 +22,8 @@ class ThisClassName {
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
         if( klass.cp[thisClassRef].type != .classRef ) { // must point to a class reference
-            jacobin.log.log( msg: "ClassFormatError in \(klass.path): Invalid thisClassReference", level: Logger.Level.SEVERE )
+            jacobin.log.log( msg: "ClassFormatError in \(klass.path): Invalid thisClassReference",
+                             level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
     }
@@ -38,6 +39,6 @@ class ThisClassName {
     // log the class name (mostly used for diagnostic purposes)
     static func log( klass: LoadedClass ) {
         jacobin.log.log( msg: "Class: \(klass.path) - short name: \(klass.shortName)",
-                level: Logger.Level.FINEST )
+                         level: Logger.Level.FINEST )
     }
 }
