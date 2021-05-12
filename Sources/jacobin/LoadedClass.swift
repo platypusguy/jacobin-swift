@@ -55,10 +55,6 @@ class CpEntryTemplate {
     init( type: Int ) {
         self.type = ConstantPool.RecType( rawValue: type ) ?? .invalid
     }
-
-    init( type: ConstantPool.RecType ) {
-        self.type = type
-    }
 }
 
 class CpEntryMethodRef: CpEntryTemplate {  // method reference (10)
