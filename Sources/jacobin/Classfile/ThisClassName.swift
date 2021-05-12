@@ -21,7 +21,7 @@ class ThisClassName {
 
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
-        if( klass.cp[thisClassRef].type != 7 ) { // must point to a class reference
+        if( klass.cp[thisClassRef].type != .classRef ) { // must point to a class reference
             jacobin.log.log( msg: "ClassFormatError in \(klass.path): Invalid thisClassReference", level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }

@@ -8,6 +8,22 @@ import Foundation
 
 class ConstantPool {
 
+    public enum RecType: Int {
+        case invalid        = -1 // used for initialization to show no value
+        case UTF8           =  1
+        case intConst       =  3
+        case longConst      =  5
+        case classRef       =  7
+        case string         =  8
+        case field          =  9
+        case method         = 10
+        case interface      = 11
+        case nameAndType    = 12
+        case methodHandle   = 15
+        case methodType     = 16
+        case invokeDynamic  = 18
+    }
+
     // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
     // This method parses through them and creates an array of parsed entries in the class being loaded. The entries in
     // the array inherit from cpEntryTemplate. Note that the first entry in all constant pools is non-existent, which I
@@ -26,8 +42,8 @@ class ConstantPool {
         while( i <= klass.constantPoolCount-1 ) {
             byteCounter += 1
             let cpeType = Int(klass.rawBytes[byteCounter])
-            switch( cpeType ) {
-            case 1: // UTF-8 string
+            switch( RecType( rawValue: cpeType ) ) {
+            case .UTF8: // UTF-8 string
                 let length =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -42,7 +58,7 @@ class ConstantPool {
                 byteCounter += Int(length)
                 print( "UTF-8 string: \( UTF8string ) " )
 
-            case 3: // integer constant
+            case .intConst: // integer constant
                 let value =
                         Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
                 let integerConstantEntry = CpIntegerConstant( value: value )
@@ -50,7 +66,7 @@ class ConstantPool {
                 byteCounter += 4
                 print( "Integer constant: \( value )" )
 
-            case 5: // long constant (fills two slots in the constant pool)
+            case .longConst: // long constant (fills two slots in the constant pool)
                 let highBytes =
                         Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
                 let lowBytes =
@@ -65,7 +81,7 @@ class ConstantPool {
                 byteCounter += 8
                 print( "Long constant: \( longValue )" )
 
-            case 7: // class reference
+            case .classRef: // class reference
                 let classNameIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -74,7 +90,7 @@ class ConstantPool {
                 byteCounter += 2
                 print( "Class name reference: index: \( classNameIndex ) " )
 
-            case 8: // string reference
+            case .string: // string reference
                 let stringIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -83,7 +99,7 @@ class ConstantPool {
                 byteCounter += 2
                 print( "String reference: string index: \(stringIndex) ")
 
-            case  9: // field reference
+            case  .field: // field reference
                 let classIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -96,7 +112,7 @@ class ConstantPool {
                 klass.cp.append( fieldRef )
                 print( "Field reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)" )
 
-            case 10: // method reference
+            case .method: // method reference
                 let classIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -109,7 +125,7 @@ class ConstantPool {
                 klass.cp.append( methodRef )
                 print( "Method reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)" )
 
-            case 11: // interface method reference
+            case .interface: // interface method reference
                 let classIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -122,7 +138,7 @@ class ConstantPool {
                 klass.cp.append( interfaceMethodRef )
                 print( "Interface reference: class index: \(classIndex) nameAndTypeIndex: \(nameAndTypeIndex)" )
 
-            case 12: // name and type info
+            case .nameAndType: // name and type info
                 let nameIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1], lsb: klass.rawBytes[byteCounter+2] )
                 let descriptorIndex =
@@ -133,7 +149,7 @@ class ConstantPool {
                 klass.cp.append( nameAndType )
                 print( "Name and type info: name index: \(nameIndex) descriptorIndex: \(descriptorIndex)")
 
-            case 15: // method handle
+            case .methodHandle: // method handle
                 let methodKind  = klass.rawBytes[byteCounter+1]
                 let methodIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+2],
@@ -143,7 +159,7 @@ class ConstantPool {
                 klass.cp.append( methodHandle )
                 print( "Method handle kind: \(methodKind) index: \(methodIndex)" )
 
-            case 16: // method type https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.9
+            case .methodType: // method type https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.9
                 let methodIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -152,7 +168,7 @@ class ConstantPool {
                 klass.cp.append( methodType )
                 print( "Method type: \(methodIndex)" )
 
-            case 18: // invokedynamic https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.10
+            case .invokeDynamic: // invokedynamic https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.10
                 let bootstrapIndex =
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
                                                     lsb: klass.rawBytes[byteCounter+2] )
@@ -177,9 +193,9 @@ class ConstantPool {
     static func verify( klass: LoadedClass, klassName: String ) {
         for n in 1...klass.constantPoolCount - 1 {
             switch ( klass.cp[n].type ) {
-            case -1: // dummy entries created by the JVM ( for 0th element, longs, doubles, etc.)
+            case .invalid: // dummy entries created by the JVM ( for 0th element, longs, doubles, etc.)
                 continue
-            case 1: //UTF8 string
+            case .UTF8: //UTF8 string
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let currEntry = currTemp as! CpEntryUTF8
                 let UTF8string = currEntry.string
@@ -204,57 +220,57 @@ class ConstantPool {
                             level: Logger.Level.SEVERE )
                 }
 
-            case 7: // class reference must point to UTF8 string
+            case .classRef: // class reference must point to UTF8 string
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let currEntry: CpEntryClassRef = currTemp as! CpEntryClassRef
                 let index = currEntry.classNameIndex
                 let pointedToEntry = klass.cp[index]
-                if pointedToEntry.type != 1 {
+                if pointedToEntry.type != .UTF8 {
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
-            case 8: // constant string must point to a UTF8 string
+            case .string: // constant string must point to a UTF8 string
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let currEntry: CpEntryStringRef = currTemp as! CpEntryStringRef
                 let index = currEntry.stringIndex
                 let pointedToEntry = klass.cp[index]
-                if pointedToEntry.type != 1 {
+                if pointedToEntry.type != .UTF8 {
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
-            case 9: // field ref must point to a class and to a nameAndType
+            case .field: // field ref must point to a class and to a nameAndType
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let currEntry: CpEntryFieldRef = currTemp as! CpEntryFieldRef
                 let classIndex = currEntry.classIndex
                 let nameAndTypeIndex = currEntry.nameAndTypeIndex
                 let pointedToEntry = klass.cp[classIndex]
                 let pointedToField = klass.cp[nameAndTypeIndex]
-                if pointedToEntry.type != 7 || pointedToField.type != 12 {
+                if pointedToEntry.type != .classRef || pointedToField.type != .nameAndType {
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
-            case 10: // method reference
+            case .method: // method reference
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let currEntry: CpEntryMethodRef = currTemp as! CpEntryMethodRef
                 let classIndex = currEntry.classIndex
                 var pointedToEntry = klass.cp[classIndex]
-                if pointedToEntry.type != 7 { //method ref must point to a class reference
+                if pointedToEntry.type != .classRef { //method ref must point to a class reference
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
                 let nameIndex = currEntry.nameAndTypeIndex
                 pointedToEntry = klass.cp[nameIndex]
-                if pointedToEntry.type != 12 { //method ref name index must point to a name and type entry
+                if pointedToEntry.type != .nameAndType { //method ref name index must point to a name and type entry
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 } else { // make sure the name and type entry's name is pointing to a correctly named method
                     let nameAndTypEntry: CpNameAndType = pointedToEntry as! CpNameAndType
                     let namePointer = nameAndTypEntry.nameIndex
                     pointedToEntry = klass.cp[namePointer]
-                    if pointedToEntry.type != 1 { //the name must be a UTF8 string
+                    if pointedToEntry.type != .UTF8 { //the name must be a UTF8 string
                         jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                                 level: Logger.Level.SEVERE )
                     } else { // if the name begins with a < it must only be <init>
@@ -267,18 +283,18 @@ class ConstantPool {
                     }
                 }
 
-            case 12: // name and type info
+            case .nameAndType: // name and type info
                 let currTemp: CpEntryTemplate = klass.cp[n]
                 let nameAndTypEntry: CpNameAndType = currTemp as! CpNameAndType
                 let namePointer = nameAndTypEntry.nameIndex
                 var cpEntry = klass.cp[namePointer]
-                if cpEntry.type != 1 { //the name pointer must point to a UTF8 string
+                if cpEntry.type != .UTF8 { //the name pointer must point to a UTF8 string
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
                 let typePointer = nameAndTypEntry.descriptorIndex
                 cpEntry = klass.cp[typePointer]
-                if cpEntry.type != 1 { //the name pointer must point to a UTF8 string
+                if cpEntry.type != .UTF8 { //the name pointer must point to a UTF8 string
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }

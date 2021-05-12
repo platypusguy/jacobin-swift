@@ -56,7 +56,18 @@ class Field {
         if attrCount > 0 {
             for i in 1...attrCount { // CURR: resume here. Only constant is important to us.
                 // get attr name
+                let attrNameIndex = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: loc+1 )
+                guard klass.cp[attrNameIndex].type == .UTF8 else { // verify we're pointing at a UTF8 rec
+                    jacobin.log.log( msg: "Class \(klass.shortName), field: \(name), description: invalid attribute pointer. skipped",
+                                     level: Logger.Level.WARNING )
+                    loc += 8
+                    continue
+                }
                 loc += 2
+                let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIndex )
+                if attrName == "ConstantValue" {
+
+                }
                 let attrLen = Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: loc+1)
                 loc += 4+attrLen
             }

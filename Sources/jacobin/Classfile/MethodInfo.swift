@@ -29,7 +29,7 @@ class MethodInfo {
         let nameIndex = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[presentLocation + 1],
                                                         lsb: klass.rawBytes[presentLocation + 2] ))
         var cpEntry = klass.cp[nameIndex]
-        if cpEntry.type != 1 {
+        if cpEntry.type != .UTF8 {
             jacobin.log.log( msg: "Error: Class: \(klass.path) - method name index \(nameIndex) invalid",
                     level: Logger.Level.FINEST )
         }
@@ -41,7 +41,7 @@ class MethodInfo {
         let descIndex = Int( Utility.getInt16from2Bytes( msb: klass.rawBytes[presentLocation + 1],
                                                          lsb: klass.rawBytes[presentLocation + 2] ))
         cpEntry = klass.cp[descIndex]
-        if cpEntry.type != 1 {
+        if cpEntry.type != .UTF8 {
             jacobin.log.log( msg: "Error: Class: \(klass.path) - method desc index \(descIndex) invalid",
                     level: Logger.Level.FINEST )
         }

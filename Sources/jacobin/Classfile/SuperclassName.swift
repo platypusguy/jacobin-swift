@@ -21,7 +21,7 @@ class SuperClassName {
 
     // verifies that the entry points to the right type of record.
     static func verify( klass: LoadedClass ) {
-        if( klass.cp[superClassRef].type != 7 &&  // must point to valid class unless this class is Object.class
+        if( klass.cp[superClassRef].type != .classRef &&  // must point to valid class unless this class is Object.class
                          klass.shortName != "java/lang/Object" ) {
             jacobin.log.log( msg: "ClassFormatError in \( klass.path ): Invalid superClassReference",
                              level: Logger.Level.SEVERE )

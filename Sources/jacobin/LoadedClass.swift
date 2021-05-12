@@ -45,13 +45,18 @@ enum classStatus  :  Int { case NOT_VERIFIED, PRELIM_VERIFIED, VERIFIED, LINKED,
 // ==== the classes for each type of entry in the constant pool and in the rest of the class ====
 
 class CpEntryTemplate {
-    var type: Int = 0
+//    var type: Int = 0
+    var type: ConstantPool.RecType = .invalid
 
     init() {
-        type = 0
+        type = .invalid
     }
 
     init( type: Int ) {
+        self.type = ConstantPool.RecType( rawValue: type ) ?? .invalid
+    }
+
+    init( type: ConstantPool.RecType ) {
         self.type = type
     }
 }

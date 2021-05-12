@@ -42,7 +42,7 @@ class Utility {
     // returns a UTF8 string pointed to by an index into the constant pool
     static func getUTF8stringFromConstantPoolIndex( klass: LoadedClass, index: Int ) -> String {
         let cpEntry = klass.cp[index]
-        if cpEntry.type != 1 {
+        if cpEntry.type != ConstantPool.RecType.UTF8 {
             jacobin.log.log( msg: "Error: Class: \(klass.path) - invalid UTF8 index \(index)",
                     level: Logger.Level.FINEST )
         }
