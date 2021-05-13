@@ -23,7 +23,7 @@ class Field {
     var accessFlags : Int16 = 0x00
     var name = ""
     var description = ""
-    var attributes : [Attribute] = []
+    var attributes : [FieldInitAttribute] = []
 
     /// loads the above data fields with the data from the classfile. Details here:
     /// https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.5
@@ -55,6 +55,9 @@ class Field {
 
         if attrCount > 0 {
             for i in 1...attrCount {
+                // var containing the constant value, if any is specified
+                var value: Any = ""
+
                 // get attr name
                 let attrNameIndex = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: loc+1 )
                 guard klass.cp[attrNameIndex].type == .UTF8 else { // verify we're pointing at a UTF8 rec
@@ -80,19 +83,22 @@ class Field {
                         continue
                     }
                     let cpRec = klass.cp[cpPointer]
+
                     switch cpRec.type {
                         case .intConst:
                             let cpIntConst =  cpRec as! CpIntegerConstant
-                            print( "field \(name) is Integer intialized to: \(cpIntConst.int)" )
+                            value = cpIntConst.int
+                            print( "field \(name) is integer intialized to: \(value)" )
                         default:
                             print( "field \(name) is initialized" )
-                    } //TODO: add the other constant types (long, double, etc.)
+                            value = "?"
+                    } //CURR: add the other constant types (long, double, etc.)
                 }
+                let fInit = FieldInitAttribute( type: description, value: value )
+                attributes.append( fInit )
                 loc += attrLen
             }
-            //CURR: add fieldAttribute to array of attributes for this field.
         }
-
         return loc
     }
 }
