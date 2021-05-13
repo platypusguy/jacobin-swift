@@ -74,7 +74,7 @@ class Field {
                 // the ConstantValue entry points to a record in the constant pool that
                 // contains the value to initialize the field to. This logic gets that
                 // record and displays the number.
-                if attrName == "ConstantValue" {
+                if attrName == "ConstantValue" { //TODO: Check that ACC_STATIC is set per section 4.7
                     let cpPointer = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: loc+1 )
                     guard cpPointer > 0 && cpPointer < klass.constantPoolCount else {
                         jacobin.log.log( msg: "Class \(klass.shortName), field: \(name), invalid constant value ptr",

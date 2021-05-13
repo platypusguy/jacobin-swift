@@ -8,7 +8,7 @@
 import Foundation
 
 /// The field attribute that holds the ConstantValue data of a field, if specified
-/// The type can be: I (int), L (long), F (float), D (double), S (string)
+/// The type can be: I (int), L (long), F (float), D (double), s (string, note: lower-case)
 /// The value is an Any type that is then downcast when accessed, based on the type variable
 class FieldInitAttribute {
     let name = "FieldInit"
