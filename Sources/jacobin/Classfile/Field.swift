@@ -45,7 +45,7 @@ class Field {
         // get the description string
         let descIndex = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: loc+1 )
         loc += 2
-        description = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: nameIndex )
+        description = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: descIndex )
 
         // get the attribute count
         let attrCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: loc+1 )
@@ -54,7 +54,7 @@ class Field {
         print( "Class \(klass.shortName), field: \(name), description: \(description), attributes: \(attrCount)" )
 
         if attrCount > 0 {
-            for i in 1...attrCount { // CURR: resume here. Only constant is important to us.
+            for i in 1...attrCount {
                 // get attr name
                 let attrNameIndex = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: loc+1 )
                 guard klass.cp[attrNameIndex].type == .UTF8 else { // verify we're pointing at a UTF8 rec
@@ -64,15 +64,34 @@ class Field {
                     continue
                 }
                 loc += 2
-                let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIndex )
-                if attrName == "ConstantValue" {
-
-                }
                 let attrLen = Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: loc+1)
-                loc += 4+attrLen
-            }
-        }
+                loc += 4
+                let attrName = Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attrNameIndex )
 
+                // the ConstantValue entry points to a record in the constant pool that
+                // contains the value to initialize the field to. This logic gets that
+                // record and displays the number.
+                if attrName == "ConstantValue" {
+                    let cpPointer = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: loc+1 )
+                    guard cpPointer > 0 && cpPointer < klass.constantPoolCount else {
+                        jacobin.log.log( msg: "Class \(klass.shortName), field: \(name), invalid constant value ptr",
+                                         level: Logger.Level.WARNING )
+                        loc += attrLen
+                        continue
+                    }
+                    let cpRec = klass.cp[cpPointer]
+                    switch cpRec.type {
+                        case .intConst:
+                            let cpIntConst =  cpRec as! CpIntegerConstant
+                            print( "field \(name) is Integer intialized to: \(cpIntConst.int)" )
+                        default:
+                            print( "field \(name) is initialized" )
+                    } //TODO: add the other constant types (long, double, etc.)
+                }
+                loc += attrLen
+            }
+            //CURR: add fieldAttribute to array of attributes for this field.
+        }
 
         return loc
     }
