@@ -48,4 +48,12 @@ class Utility {
         let UTF8entry = cpEntry as! CpEntryUTF8
         return UTF8entry.string
     }
+
+    // safety mechanism to insert in unreachable code and to throw an error
+    // if the code is unexpectedly reached
+    static func unreachableCode() throws {
+        let msg = "Unreachable code violation: \(#file) at line\(#line)"
+        jacobin.log.log(msg: msg, level: Logger.Level.SEVERE )
+        throw JVMerror.UnreachableError()
+    }
 }
