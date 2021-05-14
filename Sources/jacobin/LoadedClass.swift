@@ -108,6 +108,15 @@ class CpIntegerConstant: CpEntryTemplate {  // Constant Integer (3)
     }
 }
 
+class CpFloatConstant: CpEntryTemplate {  // Constant Float (4)
+    var float : Float = 0.0
+
+    init( value: Float ) {
+        super.init( type: 4 )
+        float = value
+    }
+}
+
 class CpLongConstant : CpEntryTemplate {  // Constant long (5)
     var long: Int64 = 0
 

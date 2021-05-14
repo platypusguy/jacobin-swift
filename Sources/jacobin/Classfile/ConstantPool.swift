@@ -12,6 +12,7 @@ class ConstantPool {
         case invalid        = -1 // used for initialization to show no value
         case UTF8           =  1
         case intConst       =  3
+        case floatConst     =  4
         case longConst      =  5
         case classRef       =  7
         case string         =  8
@@ -65,6 +66,22 @@ class ConstantPool {
                 klass.cp.append( integerConstantEntry )
                 byteCounter += 4
                 print( "Integer constant: \( value )" )
+
+            case .floatConst: // floating-point constant (32 bits) Convert 4 bytes into a Float
+                let tPointer = UnsafeMutablePointer<UInt8>.allocate(capacity:4)
+                var pointer = UnsafeRawPointer(tPointer)
+
+                tPointer[0]=klass.rawBytes[byteCounter+1]
+                tPointer[1]=klass.rawBytes[byteCounter+2]
+                tPointer[2]=klass.rawBytes[byteCounter+3]
+                tPointer[3]=klass.rawBytes[byteCounter+4]
+
+                let value: Float = pointer.load(fromByteOffset: 00, as: Float.self)
+
+                let floatConstantEntry = CpFloatConstant( value: value )
+                klass.cp.append( floatConstantEntry )
+                byteCounter += 4
+                print( "Float constant: \( value )" )
 
             case .longConst: // long constant (fills two slots in the constant pool)
                 let highBytes =
