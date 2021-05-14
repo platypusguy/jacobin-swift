@@ -45,7 +45,6 @@ enum classStatus  :  Int { case NOT_VERIFIED, PRELIM_VERIFIED, VERIFIED, LINKED,
 // ==== the classes for each type of entry in the constant pool and in the rest of the class ====
 
 class CpEntryTemplate {
-//    var type: Int = 0
     var type: ConstantPool.RecType = .invalid
 
     init() {
@@ -54,6 +53,12 @@ class CpEntryTemplate {
 
     init( type: Int ) {
         self.type = ConstantPool.RecType( rawValue: type ) ?? .invalid
+    }
+}
+
+class CpDummyEntry: CpEntryTemplate { // for filling special slots in the constant pool -- long, double, etc.
+    override init() {
+        super.init( type: -1 )
     }
 }
 

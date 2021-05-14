@@ -37,11 +37,11 @@ class ConstantPool {
     // returns the byte number of the end of constant pool
     //
     // Refer to: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4-140
-    // TODO: Adding the remaining entry types for the class constant pool
     static func load( klass: LoadedClass ) -> Int {
         var byteCounter = 9 //the number of bytes we're into the class file (zero-based)
-        let cpe = CpEntryTemplate( type: -1 )
-        klass.cp.append( cpe ) // entry[0] is a dummy entry that's never used
+
+        let dummyEntry = CpDummyEntry()
+        klass.cp.append( dummyEntry ) // entry[0] is a dummy entry that's never used
         var i = 1
         while( i <= klass.constantPoolCount-1 ) {
             byteCounter += 1
@@ -56,11 +56,11 @@ class ConstantPool {
                 for n in 0...Int(length-1)  {
                     buffer.append( klass.rawBytes[byteCounter+n+1] )
                 }
-                let UTF8string = String(bytes: buffer, encoding: String.Encoding.utf8 ) ?? ""
+                let UTF8string = String( bytes: buffer, encoding: String.Encoding.utf8 ) ?? ""
                 let UTF8entry = CpEntryUTF8( contents: UTF8string )
                 klass.cp.append( UTF8entry )
                 byteCounter += Int(length)
-                print( "UTF-8 string: \( UTF8string ) " )
+                print( "UTF-8 string: \( UTF8string )" )
 
             case .intConst: // integer constant
                 let value =
@@ -88,15 +88,15 @@ class ConstantPool {
 
             case .longConst: // long constant (fills two slots in the constant pool)
                 let highBytes =
-                        Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                        Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: byteCounter+1 )
                 let lowBytes =
-                        Utility.getIntfrom4Bytes(bytes: klass.rawBytes, index: byteCounter+5 )
-                let longValue : Int64 = Int64(( highBytes << 32) + lowBytes)
+                        Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: byteCounter+5 )
+                let longValue : Int64 = Int64(( highBytes << 32) + lowBytes )
                 let longConstantEntry = CpLongConstant( value: longValue )
                 klass.cp.append( longConstantEntry )
                 // longs take up two slots in the constant pool, of which the second slot is
                 // never accessed. So set up a dummy entry for that slot.
-                klass.cp.append( CpEntryTemplate( type: -1 ))
+                klass.cp.append( CpDummyEntry() )
                 klass.constantPoolCount -= 1 // decrease the total number of entries to create due to dummy
                 byteCounter += 8
                 print( "Long constant: \( longValue )" )
@@ -118,8 +118,8 @@ class ConstantPool {
 
                 let doubleConstantEntry = CpDoubleConstant( value: value )
                 klass.cp.append( doubleConstantEntry )
-                // now add the dummy entry, which happen with Longs and Doubles
-                klass.cp.append( CpEntryTemplate( type: -1 ))
+                // now add the dummy entry, which happen with longs and doubles
+                klass.cp.append( CpDummyEntry() )
                 klass.constantPoolCount -= 1 // decrease the total number of entries to create due to dummy
                 byteCounter += 8
                 print( "Double constant: \( value )" )
@@ -131,7 +131,7 @@ class ConstantPool {
                 let classNameRef = CpEntryClassRef( index: classNameIndex )
                 klass.cp.append( classNameRef )
                 byteCounter += 2
-                print( "Class name reference: index: \( classNameIndex ) " )
+                print( "Class name reference: index: \( classNameIndex )" )
 
             case .string: // string reference
                 let stringIndex =
@@ -188,7 +188,7 @@ class ConstantPool {
                         Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+3], lsb: klass.rawBytes[byteCounter+4] )
                 byteCounter += 4
                 let nameAndType : CpNameAndType =
-                        CpNameAndType( nameIdx: Int(nameIndex), descriptorIdx: Int(descriptorIndex))
+                        CpNameAndType( nameIdx: Int(nameIndex), descriptorIdx: Int(descriptorIndex) )
                 klass.cp.append( nameAndType )
                 print( "Name and type info: name index: \(nameIndex) descriptorIndex: \(descriptorIndex)")
 
@@ -224,11 +224,11 @@ class ConstantPool {
                 print( "Invokedynamic boostrap idx: \(bootstrapIndex), name and type: \(nameAndTypeIndex)" )
 
             case .module: // module (valid for Java 9+)
-                let nameIndex = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                let nameIndex = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: byteCounter+1 )
                 byteCounter += 2
                 guard nameIndex > 0 && nameIndex < klass.constantPoolCount else {
                     jacobin.log.log( msg: "Class \(klass.shortName), invalid module name",
-                        level: Logger.Level.WARNING )
+                                     level: Logger.Level.WARNING )
                     klass.cp.append( CpModuleName( moduleName: "" ))
                     continue
                 }
@@ -237,11 +237,11 @@ class ConstantPool {
                 klass.cp.append( CpModuleName( moduleName: moduleName ))
 
             case .package: // package name (valid for Java 9+)
-                let nameIndex = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                let nameIndex = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: byteCounter+1 )
                 byteCounter += 2
                 guard nameIndex > 0 && nameIndex < klass.constantPoolCount else {
                     jacobin.log.log( msg: "Class \(klass.shortName), invalid package name",
-                        level: Logger.Level.WARNING )
+                                     level: Logger.Level.WARNING )
                     klass.cp.append( CpPackageName( packageName: "" ))
                     continue
                 }
