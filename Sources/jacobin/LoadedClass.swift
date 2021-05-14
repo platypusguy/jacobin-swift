@@ -57,6 +57,17 @@ class CpEntryTemplate {
     }
 }
 
+class CpEntryUTF8: CpEntryTemplate { //UTF8 string (1)
+    var length = 0
+    var string = ""
+
+    init( contents: String ) {
+        super.init( type: 1 )
+        string = contents
+        length = contents.count
+    }
+}
+
 class CpEntryMethodRef: CpEntryTemplate {  // method reference (10)
     var classIndex = 0
     var nameAndTypeIndex = 0
@@ -175,14 +186,12 @@ class CpInvokedynamic: CpEntryTemplate { // invokedynamic (18)
     }
 }
 
-class CpEntryUTF8: CpEntryTemplate {
-    var length = 0
-    var string = ""
+class CpModuleName: CpEntryTemplate { // module name (19)
+    var name = ""
 
-    init( contents: String ) {
-        super.init( type: 1 )
-        string = contents
-        length = contents.count
+    init( moduleName: String ) {
+        super.init( type: 19 )
+        name = moduleName
     }
 }
 

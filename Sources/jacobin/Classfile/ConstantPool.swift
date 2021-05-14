@@ -24,6 +24,8 @@ class ConstantPool {
         case methodHandle   = 15
         case methodType     = 16
         case invokeDynamic  = 18
+        case module         = 19
+        case package        = 20
     }
 
     // the constant pool of a class is a collection of individual entries that point to classes, methods, strings, etc.
@@ -116,6 +118,7 @@ class ConstantPool {
 
                 let doubleConstantEntry = CpDoubleConstant( value: value )
                 klass.cp.append( doubleConstantEntry )
+                // now add the dummy entry, which happen with Longs and Doubles
                 klass.cp.append( CpEntryTemplate( type: -1 ))
                 klass.constantPoolCount -= 1 // decrease the total number of entries to create due to dummy
                 byteCounter += 8
@@ -219,6 +222,19 @@ class ConstantPool {
                 let invokedynamic = CpInvokedynamic( bootstrap: bootstrapIndex, nameAndType: nameAndTypeIndex)
                 klass.cp.append( invokedynamic )
                 print( "Invokedynamic boostrap idx: \(bootstrapIndex), name and type: \(nameAndTypeIndex)" )
+
+            case .module: // module (valid for Java 9+ )
+                let nameIndex = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                byteCounter += 2
+                guard nameIndex > 0 && nameIndex < klass.constantPoolCount else {
+                    jacobin.log.log( msg: "Class \(klass.shortName), invalid module name",
+                        level: Logger.Level.WARNING )
+                    klass.cp.append( CpModuleName( moduleName: "" ))
+                    continue
+                }
+                let moduleName =
+                    Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: nameIndex )
+                klass.cp.append( CpModuleName( moduleName: moduleName ))
 
             default:
                 print( "** Unhandled constant pool entry found: \(cpeType) at byte \(byteCounter)" )
