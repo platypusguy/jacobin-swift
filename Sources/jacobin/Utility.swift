@@ -11,7 +11,7 @@ import Foundation
 
 class Utility {
 
-    // converts two successive bytes into a 16-bit unsigned integer
+    // converts two successive bytes into a 16-bit integer
     static func getInt16from2Bytes( msb: UInt8, lsb: UInt8 ) -> Int16 {
         return Int16(( Int( msb ) * 256 ) + Int( lsb ))
     }
