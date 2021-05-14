@@ -54,6 +54,6 @@ class Utility {
     static func unreachableCode() throws {
         let msg = "Unreachable code violation: \(#file) at line\(#line)"
         jacobin.log.log(msg: msg, level: Logger.Level.SEVERE )
-        throw JVMerror.UnreachableError()
+        throw JVMerror.UnreachableError( msg: "" )
     }
 }
