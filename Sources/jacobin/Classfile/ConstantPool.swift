@@ -9,11 +9,12 @@ import Foundation
 class ConstantPool {
 
     public enum RecType: Int {
-        case invalid        = -1 // used for initialization to show no value
+        case invalid        = -1 // used for initialization and for dummy entries (viz. for longs, doubles)
         case UTF8           =  1
         case intConst       =  3
         case floatConst     =  4
         case longConst      =  5
+        case doubleConst    =  6
         case classRef       =  7
         case string         =  8
         case field          =  9
@@ -68,15 +69,15 @@ class ConstantPool {
                 print( "Integer constant: \( value )" )
 
             case .floatConst: // floating-point constant (32 bits) Convert 4 bytes into a Float
-                let tPointer = UnsafeMutablePointer<UInt8>.allocate(capacity:4)
-                var pointer = UnsafeRawPointer(tPointer)
+                let tPointer = UnsafeMutablePointer<UInt8>.allocate( capacity:4 )
+                var pointer = UnsafeRawPointer( tPointer )
 
                 tPointer[0]=klass.rawBytes[byteCounter+1]
                 tPointer[1]=klass.rawBytes[byteCounter+2]
                 tPointer[2]=klass.rawBytes[byteCounter+3]
                 tPointer[3]=klass.rawBytes[byteCounter+4]
 
-                let value: Float = pointer.load(fromByteOffset: 00, as: Float.self)
+                let value: Float = pointer.load( fromByteOffset: 00, as: Float.self )
 
                 let floatConstantEntry = CpFloatConstant( value: value )
                 klass.cp.append( floatConstantEntry )
@@ -93,10 +94,32 @@ class ConstantPool {
                 klass.cp.append( longConstantEntry )
                 // longs take up two slots in the constant pool, of which the second slot is
                 // never accessed. So set up a dummy entry for that slot.
-                klass.cp.append( CpEntryTemplate( type: -1 ) )
+                klass.cp.append( CpEntryTemplate( type: -1 ))
                 klass.constantPoolCount -= 1 // decrease the total number of entries to create due to dummy
                 byteCounter += 8
                 print( "Long constant: \( longValue )" )
+
+            case .doubleConst: // double floating-point constant (64 bits). Fills two slots in the constant pool
+                let tPointer = UnsafeMutablePointer<UInt8>.allocate( capacity:8 )
+                var pointer = UnsafeRawPointer( tPointer )
+
+                tPointer[0]=klass.rawBytes[byteCounter+1]
+                tPointer[1]=klass.rawBytes[byteCounter+2]
+                tPointer[2]=klass.rawBytes[byteCounter+3]
+                tPointer[3]=klass.rawBytes[byteCounter+4]
+                tPointer[4]=klass.rawBytes[byteCounter+5]
+                tPointer[5]=klass.rawBytes[byteCounter+6]
+                tPointer[6]=klass.rawBytes[byteCounter+7]
+                tPointer[7]=klass.rawBytes[byteCounter+8]
+
+                let value: Double = pointer.load( fromByteOffset: 00, as: Double.self )
+
+                let doubleConstantEntry = CpDoubleConstant( value: value )
+                klass.cp.append( doubleConstantEntry )
+                klass.cp.append( CpEntryTemplate( type: -1 ))
+                klass.constantPoolCount -= 1 // decrease the total number of entries to create due to dummy
+                byteCounter += 8
+                print( "Double constant: \( value )" )
 
             case .classRef: // class reference
                 let classNameIndex =

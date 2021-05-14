@@ -117,12 +117,21 @@ class CpFloatConstant: CpEntryTemplate {  // Constant Float (4)
     }
 }
 
-class CpLongConstant : CpEntryTemplate {  // Constant long (5)
+class CpLongConstant : CpEntryTemplate {  // Constant Long (5)
     var long: Int64 = 0
 
     init( value: Int64 ) {
         super.init( type: 5 )
         long = value
+    }
+}
+
+class CpDoubleConstant: CpEntryTemplate {  // Constant Double (6)
+    var double : Double = 0.0
+
+    init( value: Double ) {
+        super.init( type: 6 )
+        double = value
     }
 }
 
