@@ -223,7 +223,7 @@ class ConstantPool {
                 klass.cp.append( invokedynamic )
                 print( "Invokedynamic boostrap idx: \(bootstrapIndex), name and type: \(nameAndTypeIndex)" )
 
-            case .module: // module (valid for Java 9+ )
+            case .module: // module (valid for Java 9+)
                 let nameIndex = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
                 byteCounter += 2
                 guard nameIndex > 0 && nameIndex < klass.constantPoolCount else {
@@ -235,6 +235,19 @@ class ConstantPool {
                 let moduleName =
                     Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: nameIndex )
                 klass.cp.append( CpModuleName( moduleName: moduleName ))
+
+            case .package: // package name (valid for Java 9+)
+                let nameIndex = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                byteCounter += 2
+                guard nameIndex > 0 && nameIndex < klass.constantPoolCount else {
+                    jacobin.log.log( msg: "Class \(klass.shortName), invalid package name",
+                        level: Logger.Level.WARNING )
+                    klass.cp.append( CpPackageName( packageName: "" ))
+                    continue
+                }
+                let packageName =
+                    Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: nameIndex )
+                klass.cp.append( CpPackageName( packageName: packageName ))
 
             default:
                 print( "** Unhandled constant pool entry found: \(cpeType) at byte \(byteCounter)" )

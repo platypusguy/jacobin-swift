@@ -195,6 +195,15 @@ class CpModuleName: CpEntryTemplate { // module name (19)
     }
 }
 
+class CpPackageName: CpEntryTemplate { // package name (20)
+    var name = ""
+
+    init( packageName: String ) {
+        super.init( type: 20 )
+        name = packageName
+    }
+}
+
 class CpNameAndType: CpEntryTemplate {
     var nameIndex = 0
     var descriptorIndex = 0
