@@ -88,13 +88,22 @@ class ClassParser {
             InterfaceCount.log( klass: klass )
             location += 2
 
-            //**Eventually: add handling of interfaces, when count > 0
+            // get the names of all the interfaces implemented by this class
+            if klass.interfaceCount > 0 {
+                for _ in 1...klass.interfaceCount {
+                    let index = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: location+1 )
+                    location += 2
+                    Interface.process( klass: klass, index: index )
+                }
+                Interface.logAll( klass: klass )
+            }
 
             // get the count of fields in this class, put it into klass.fieldCount
             FieldCount.readFieldCount( klass: klass, location: location )
             FieldCount.log( klass: klass )
             location += 2
 
+            // ...and process the fields
             if klass.fieldCount > 0  {
                 for i in 1...klass.fieldCount {
                     let field = Field()

@@ -21,6 +21,7 @@ class LoadedClass {
     var shortName = ""
     var superClassName = ""
     var interfaceCount = 0
+    var interfaces: [String] = []
     var fieldCount = 0
     var fields: [Field] = []
     var methodCount = 0
