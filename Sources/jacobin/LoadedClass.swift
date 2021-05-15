@@ -180,6 +180,19 @@ class CpMethodType: CpEntryTemplate { // constant method type (16)
     }
 }
 
+class CpDynamic: CpEntryTemplate { // dynamic constant (17)
+    var bootstrapIdx = 0
+    var nameIdx = 0
+    var descIdx = 0
+
+    init( bootstrap: Int, name: Int, desc: Int ) {
+        super.init( type: 17 )
+        bootstrapIdx = bootstrap
+        nameIdx = name
+        descIdx = desc
+    }
+}
+
 class CpInvokedynamic: CpEntryTemplate { // invokedynamic (18)
     var bootstrapIndex = 0
     var nameAndTypeIndex = 0

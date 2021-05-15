@@ -23,6 +23,7 @@ class ConstantPool {
         case nameAndType    = 12
         case methodHandle   = 15
         case methodType     = 16
+        case dynamic        = 17
         case invokeDynamic  = 18
         case module         = 19
         case package        = 20
@@ -72,7 +73,7 @@ class ConstantPool {
 
             case .floatConst: // floating-point constant (32 bits) Convert 4 bytes into a Float
                 let tPointer = UnsafeMutablePointer<UInt8>.allocate( capacity:4 )
-                var pointer = UnsafeRawPointer( tPointer )
+                let pointer = UnsafeRawPointer( tPointer )
 
                 tPointer[0]=klass.rawBytes[byteCounter+1]
                 tPointer[1]=klass.rawBytes[byteCounter+2]
@@ -103,7 +104,7 @@ class ConstantPool {
 
             case .doubleConst: // double floating-point constant (64 bits). Fills two slots in the constant pool
                 let tPointer = UnsafeMutablePointer<UInt8>.allocate( capacity:8 )
-                var pointer = UnsafeRawPointer( tPointer )
+                let pointer = UnsafeRawPointer( tPointer )
 
                 tPointer[0]=klass.rawBytes[byteCounter+1]
                 tPointer[1]=klass.rawBytes[byteCounter+2]
@@ -222,6 +223,18 @@ class ConstantPool {
                 let invokedynamic = CpInvokedynamic( bootstrap: bootstrapIndex, nameAndType: nameAndTypeIndex)
                 klass.cp.append( invokedynamic )
                 print( "Invokedynamic boostrap idx: \(bootstrapIndex), name and type: \(nameAndTypeIndex)" )
+
+            case .dynamic: // dynamic, which points to info re dynamically computed constants
+                let bootstrapIndex  = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: byteCounter+1 )
+                let nameAndDefIndex = Utility.getIntFrom2Bytes(bytes: klass.rawBytes, index: byteCounter+3 )
+                byteCounter += 4
+
+                let nameAndType : CpNameAndType = klass.cp[nameAndDefIndex] as! CpNameAndType
+                let dynamic = CpDynamic( bootstrap: bootstrapIndex,
+                                         name: nameAndType.nameIndex,
+                                         desc: nameAndType.descriptorIndex )
+                klass.cp.append( dynamic )
+                print( "Dynamic entry found" )
 
             case .module: // module (valid for Java 9+)
                 let nameIndex = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: byteCounter+1 )
