@@ -20,9 +20,15 @@ class Interface {
     static func process( klass: LoadedClass, index: Int ) {
         let interface = klass.cp[index] as! CpEntryClassRef
         let intNameIdx = interface.classNameIndex
-        let intName =
-            Utility.getUTF8stringFromConstantPoolIndex(klass: klass, index: intNameIdx)
-        klass.interfaces.append( intName )
+        if intNameIdx <= 0 || intNameIdx >= klass.constantPoolCount {
+            jacobin.log.log( msg: "Error: In \(klass.shortName) - invalid UTF8 index \(index) in Interface entry",
+                             level: Logger.Level.INFO )
+            return
+        }
+
+        let interfaceName =
+            Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: intNameIdx)
+        klass.interfaces.append( interfaceName )
     }
 
     // log the value (mostly used for diagnostic purposes)
