@@ -43,7 +43,8 @@ class Utility {
         let cpEntry = klass.cp[index]
         if cpEntry.type != ConstantPool.RecType.UTF8 {
             jacobin.log.log( msg: "Error: Class: \(klass.path) - invalid UTF8 index \(index)",
-                             level: Logger.Level.FINEST )
+                             level: Logger.Level.WARNING )
+            return ""
         }
         let UTF8entry = cpEntry as! CpEntryUTF8
         return UTF8entry.string
