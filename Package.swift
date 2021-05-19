@@ -15,8 +15,8 @@ let package = Package(
         .target(
             name: "jacobin",
             dependencies: []),
-        .testTarget(
-            name: "jacobinTests",
-            dependencies: ["jacobin"]),
+//        .testTarget(
+//            name: "jacobinTests",
+//            dependencies: ["jacobin"]),
     ]
 )
