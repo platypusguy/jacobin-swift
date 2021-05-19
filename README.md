@@ -1,3 +1,5 @@
+[![Swift](https://github.com/platypusguy/jacobin/actions/workflows/swift.yml/badge.svg)](https://github.com/platypusguy/jacobin/actions/workflows/swift.yml)
+
 # jacobin
 
 A more-than-minimal JVM written in Swift. 
