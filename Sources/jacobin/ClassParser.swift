@@ -25,7 +25,7 @@ class ClassParser {
             klass.rawBytes = [UInt8]( data )
         } catch {
             log.log( msg: "Error reading file: \(name) Exiting", level: Logger.Level.SEVERE )
-            shutdown( successFlag: false )
+            throw JVMerror.ClassFormatError( name: "" )
         }
 
         do {
