@@ -272,7 +272,8 @@ class ConstantPool {
     }
 
     // make sure all the pointers point to the correct items and that values are within the right range
-    static func verify( klass: LoadedClass, klassName: String ) {
+    static func verify( klass: LoadedClass ) throws {
+        let className = klass.path
         for n in 1...klass.constantPoolCount - 1 {
             switch ( klass.cp[n].type ) {
             case .invalid: // dummy entries created by the JVM ( for 0th element, longs, doubles, etc.)
@@ -298,8 +299,9 @@ class ConstantPool {
                            UTF8string.contains( Character( UnicodeScalar( 0xFD ) ) ) ||
                            UTF8string.contains( Character( UnicodeScalar( 0xFE ) ) ) ||
                            UTF8string.contains( Character( UnicodeScalar( 0xFF ) ) ) {
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                                      level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "" )
                 }
 
             case .classRef: // class reference must point to UTF8 string
@@ -308,7 +310,7 @@ class ConstantPool {
                 let index = currEntry.classNameIndex
                 let pointedToEntry = klass.cp[index]
                 if pointedToEntry.type != .UTF8 {
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -318,7 +320,7 @@ class ConstantPool {
                 let index = currEntry.stringIndex
                 let pointedToEntry = klass.cp[index]
                 if pointedToEntry.type != .UTF8 {
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -330,7 +332,7 @@ class ConstantPool {
                 let pointedToEntry = klass.cp[classIndex]
                 let pointedToField = klass.cp[nameAndTypeIndex]
                 if pointedToEntry.type != .classRef || pointedToField.type != .nameAndType {
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
 
@@ -340,26 +342,26 @@ class ConstantPool {
                 let classIndex = currEntry.classIndex
                 var pointedToEntry = klass.cp[classIndex]
                 if pointedToEntry.type != .classRef { //method ref must point to a class reference
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
                 let nameIndex = currEntry.nameAndTypeIndex
                 pointedToEntry = klass.cp[nameIndex]
                 if pointedToEntry.type != .nameAndType { //method ref name index must point to a name and type entry
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                             level: Logger.Level.SEVERE )
                 } else { // make sure the name and type entry's name is pointing to a correctly named method
                     let nameAndTypEntry: CpNameAndType = pointedToEntry as! CpNameAndType
                     let namePointer = nameAndTypEntry.nameIndex
                     pointedToEntry = klass.cp[namePointer]
                     if pointedToEntry.type != .UTF8 { //the name must be a UTF8 string
-                        jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                        jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                                 level: Logger.Level.SEVERE )
                     } else { // if the name begins with a < it must only be <init>
                         let utf8Entry = pointedToEntry as! CpEntryUTF8
                         let methodName = utf8Entry.string
                         if methodName.starts( with: "<" ) && !( methodName.starts( with: "<init>" ) ) {
-                            jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                            jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                                     level: Logger.Level.SEVERE )
                         }
                     }
@@ -371,18 +373,57 @@ class ConstantPool {
                 let namePointer = nameAndTypEntry.nameIndex
                 var cpEntry = klass.cp[namePointer]
                 if cpEntry.type != .UTF8 { //the name pointer must point to a UTF8 string
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
                 let typePointer = nameAndTypEntry.descriptorIndex
                 cpEntry = klass.cp[typePointer]
                 if cpEntry.type != .UTF8 { //the name pointer must point to a UTF8 string
-                    jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
-                            level: Logger.Level.SEVERE )
+                    jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
+                                     level: Logger.Level.SEVERE )
                 }
 
+            case .methodHandle: // method handle
+                if klass.version < 51 {
+                    jacobin.log.log( msg: "Error invalid methodHandle entry in \(className) Exiting.",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "" )
+                }
 
+            case .methodType: // method type
+                if klass.version < 51 {
+                    jacobin.log.log( msg: "Error invalid methodType entry in \(className) Exiting.",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "" )
+                }
 
+            case .dynamic: // constant dynamic
+                if klass.version < 55 {
+                    jacobin.log.log( msg: "Error invalid constant dynamic entry in \(className) Exiting.",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "" )
+                }
+
+                case .invokeDynamic: // invokedynamic bytecode
+                if klass.version < 51 {
+                    jacobin.log.log( msg: "Error invalid invokedynamic entry in \(className) Exiting.",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "" )
+                }
+
+            case .module: // JPMS module
+                if klass.version < 53 {
+                    jacobin.log.log( msg: "Error invalid module entry in \(className) Exiting.",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "" )
+                }
+
+            case .package: // JPMS package
+                if klass.version < 53 {
+                    jacobin.log.log( msg: "Error invalid package entry in \(className) Exiting.",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "" )
+                }
             default: continue // for the nonce, eventually should be an error.
             }
         }

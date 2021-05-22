@@ -25,14 +25,14 @@ class ClassParser {
             klass.rawBytes = [UInt8]( data )
         } catch {
             log.log( msg: "Error reading file: \(name) Exiting", level: Logger.Level.SEVERE )
-            throw JVMerror.ClassFormatError( name: "" )
+            throw JVMerror.ClassFormatError( msg: "" )
         }
 
         do {
             //check that the class file begins with the magic number 0xCAFEBABE
             if klass.rawBytes[0] != 0xCA || klass.rawBytes[1] != 0xFE ||
                klass.rawBytes[2] != 0xBA || klass.rawBytes[3] != 0xBE {
-                throw JVMerror.ClassFormatError( name: name )
+                throw JVMerror.ClassFormatError( msg: name )
             }
 
             //check that the file version is not above JDK 11 (that is, 55)
@@ -50,7 +50,7 @@ class ClassParser {
             // get the constant pool count
             let cpCount = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: 8 )
             if cpCount < 2 {
-                throw JVMerror.ClassFormatError( name: name + " constant pool count." )
+                throw JVMerror.ClassFormatError( msg: name + " constant pool count." )
             } else {
                 klass.constantPoolCount = cpCount
                 log.log( msg: "Class \(name) constant pool should have \(cpCount) entries",
@@ -59,7 +59,7 @@ class ClassParser {
 
             // load and verify the constant pool
             var location: Int = ConstantPool.load( klass: klass ) //location = index of last byte examined
-            ConstantPool.verify( klass: klass, klassName: name )
+            try ConstantPool.verify( klass: klass )
             ConstantPool.log( klass: klass )
 
             // load and verify the class access masks
@@ -153,9 +153,9 @@ class ClassParser {
                 }
             }
         }
-        catch JVMerror.ClassFormatError( name: klass.path ) {
+        catch JVMerror.ClassFormatError( msg: klass.path ) {
             log.log( msg: "ClassFormatError in \(name)", level: Logger.Level.SEVERE )
-            throw JVMerror.ClassFormatError( name: "" )
+            throw JVMerror.ClassFormatError( msg: "" )
         }
 
         //TODO: and validate with the logic here: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.1
