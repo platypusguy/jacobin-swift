@@ -311,7 +311,7 @@ class ConstantPool {
                 let pointedToEntry = klass.cp[index]
                 if pointedToEntry.type != .UTF8 {
                     jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                            level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                 }
 
             case .string: // constant string must point to a UTF8 string
@@ -321,7 +321,7 @@ class ConstantPool {
                 let pointedToEntry = klass.cp[index]
                 if pointedToEntry.type != .UTF8 {
                     jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                            level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                 }
 
             case .field: // field ref must point to a class and to a nameAndType
@@ -333,7 +333,7 @@ class ConstantPool {
                 let pointedToField = klass.cp[nameAndTypeIndex]
                 if pointedToEntry.type != .classRef || pointedToField.type != .nameAndType {
                     jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                            level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                 }
 
             case .method: // method reference
@@ -343,26 +343,26 @@ class ConstantPool {
                 var pointedToEntry = klass.cp[classIndex]
                 if pointedToEntry.type != .classRef { //method ref must point to a class reference
                     jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                            level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                 }
                 let nameIndex = currEntry.nameAndTypeIndex
                 pointedToEntry = klass.cp[nameIndex]
                 if pointedToEntry.type != .nameAndType { //method ref name index must point to a name and type entry
                     jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                            level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                 } else { // make sure the name and type entry's name is pointing to a correctly named method
                     let nameAndTypEntry: CpNameAndType = pointedToEntry as! CpNameAndType
                     let namePointer = nameAndTypEntry.nameIndex
                     pointedToEntry = klass.cp[namePointer]
                     if pointedToEntry.type != .UTF8 { //the name must be a UTF8 string
                         jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                                level: Logger.Level.SEVERE )
+                                         level: Logger.Level.SEVERE )
                     } else { // if the name begins with a < it must only be <init>
                         let utf8Entry = pointedToEntry as! CpEntryUTF8
                         let methodName = utf8Entry.string
                         if methodName.starts( with: "<" ) && !( methodName.starts( with: "<init>" ) ) {
                             jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                                    level: Logger.Level.SEVERE )
+                                             level: Logger.Level.SEVERE )
                         }
                     }
                 }
@@ -374,7 +374,7 @@ class ConstantPool {
                 var cpEntry = klass.cp[namePointer]
                 if cpEntry.type != .UTF8 { //the name pointer must point to a UTF8 string
                     jacobin.log.log( msg: "Error validating constant pool in class \(className) Exiting.",
-                            level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                 }
                 let typePointer = nameAndTypEntry.descriptorIndex
                 cpEntry = klass.cp[typePointer]
