@@ -15,3 +15,6 @@ enum JVMerror : Error {
     case InvalidParameterError( msg: String )
     case UnreachableError( msg: String )
 }
+
+// Private note: for many errors, use this message:
+// JVMerror.ClassFormatError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
