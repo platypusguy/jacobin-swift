@@ -78,7 +78,7 @@ class ClassParser {
 
             // get the pointer to the superclass for this class and extract the name
             SuperClassName.readName( klass: klass, location: location )
-            SuperClassName.verify( klass: klass )
+            try SuperClassName.verify( klass: klass )
             SuperClassName.process( klass: klass )
             SuperClassName.log( klass: klass )
             location += 2
