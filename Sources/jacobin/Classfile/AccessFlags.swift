@@ -47,35 +47,35 @@ class AccessFlags {
                    klass.classIsFinal    == true  ||
                    klass.classIsEnum     == true  ||
                    klass.classIsModule   == true {
-                       throw JVMerror.ClassVerificationError( name: klass.path )
+                       throw JVMerror.ClassVerificationError( msg: klass.path )
                 }
             }
 
             if klass.classIsInterface == false {
                 if klass.classIsAnnotation == true ||
                    klass.classIsModule     == true {
-                       throw JVMerror.ClassVerificationError( name: klass.path )
+                       throw JVMerror.ClassVerificationError( msg: klass.path )
                 }
                 else
                 if klass.classIsFinal    == true &&
                    klass.classIsAbstract == true {
-                       throw JVMerror.ClassVerificationError( name: klass.path )
+                       throw JVMerror.ClassVerificationError( msg: klass.path )
                 }
             }
 
             if klass.classIsAnnotation == true &&
                klass.classIsInterface  == false {
-                       throw JVMerror.ClassVerificationError( name: klass.path )
+                       throw JVMerror.ClassVerificationError( msg: klass.path )
             }
 
             if klass.accessMask == 0 {
-                       throw JVMerror.ClassVerificationError( name: klass.path )
+                       throw JVMerror.ClassVerificationError( msg: klass.path )
             }
 
         }
         catch  {
             jacobin.log.log( msg: "Class verification error in access masks of class \(klass.path)",
-                     level: Logger.Level.SEVERE )
+                             level: Logger.Level.SEVERE )
             shutdown( successFlag: false )
         }
     }
@@ -83,6 +83,7 @@ class AccessFlags {
     // log this if we're set at the most verbose level of detail
     static func log( klass: LoadedClass ) {
         let s = String( format: "%02X", klass.accessMask )
-        jacobin.log.log(msg: "Class: \(klass.path) - access mask: \(s)", level: Logger.Level.FINEST )
+        jacobin.log.log( msg: "Class: \(klass.path) - access mask: \(s)",
+                         level: Logger.Level.FINEST )
     }
 }

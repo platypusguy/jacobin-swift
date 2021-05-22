@@ -10,8 +10,8 @@
 import Foundation
 
 enum JVMerror : Error {
-    case ClassFormatError( name: String )
-    case ClassVerificationError( name: String )
+    case ClassFormatError( msg: String )
+    case ClassVerificationError( msg: String )
     case InvalidParameterError( msg: String )
     case UnreachableError( msg: String )
 }
