@@ -39,6 +39,9 @@ class Classloader {
         var klass = LoadedClass()
         do {
             try ClassParser.parseClassfile(name: name, klass: klass )
+            if name != "bootstrap" { //bootstrap-loaded classes don't require an integrity check
+                try ClassIntegrity.check( klass: klass )
+            }
             insert( name: name, klass: klass )
         }
         catch JVMerror.ClassFormatError {

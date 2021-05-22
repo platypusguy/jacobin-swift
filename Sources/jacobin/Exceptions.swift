@@ -12,5 +12,6 @@ import Foundation
 enum JVMerror : Error {
     case ClassFormatError( name: String )
     case ClassVerificationError( name: String )
+    case InvalidParameterError( msg: String )
     case UnreachableError( msg: String )
 }

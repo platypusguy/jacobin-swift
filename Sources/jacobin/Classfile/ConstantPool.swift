@@ -299,7 +299,7 @@ class ConstantPool {
                            UTF8string.contains( Character( UnicodeScalar( 0xFE ) ) ) ||
                            UTF8string.contains( Character( UnicodeScalar( 0xFF ) ) ) {
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
-                            level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                 }
 
             case .classRef: // class reference must point to UTF8 string
@@ -380,6 +380,8 @@ class ConstantPool {
                     jacobin.log.log( msg: "Error validating constant pool in class \(klassName) Exiting.",
                             level: Logger.Level.SEVERE )
                 }
+
+
 
             default: continue // for the nonce, eventually should be an error.
             }
