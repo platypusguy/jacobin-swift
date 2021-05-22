@@ -17,27 +17,51 @@ class ClassIntegrity {
         //Notes: the integrity of superclass entries is verified when they're loaded
 
         if klass.methodCount > 0 {
-            try verifyMethods( klass: klass )
+            try verifyMethodAccessFlags( klass: klass )
+            //TODO: Add integrity checks on method attributes
         }
     }
 
-    /// validate the method entries per the requirements in:
+    /// validate the method access flag requirements per the specification in:
     /// https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.6
     /// - Parameter klass: the parsed class containing the method entries
-    private static func verifyMethods( klass: LoadedClass ) throws {
+    private static func verifyMethodAccessFlags( klass: LoadedClass ) throws {
         for i in 0...klass.methodCount-1 {
             let method = klass.methodInfo[i]
+
             //check the access levels for the method
-            if ( method.isPublic() && method.isPrivate() ) ||
-               ( method.isPublic() && method.isProtected() ) ||
+            if ( method.isPublic()  && method.isPrivate() )   ||
+               ( method.isPublic()  && method.isProtected() ) ||
                ( method.isPrivate() && method.isProtected() ) {
                 jacobin.log.log( msg: "Method \(method.name) in \(klass.shortName) has conflicting access specifiers",
                                  level: Logger.Level.SEVERE )
                 throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
             }
 
+            if klass.classIsInterface &&
+               ( method.isProtected() || method.isFinal() ||
+                 method.isNative()    || method.isSynchronized() ) {
+                jacobin.log.log( msg: "Interface method \(method.name) in \(klass.shortName) has invalid attributes",
+                    level: Logger.Level.SEVERE )
+                throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
+            }
 
+            if method.isAbstract() &&
+               ( method.isPrivate()  || method.isStatic() ||
+                 method.isFinal()    || method.isNative() ||
+                 method.isStrictFP() || method.isSynchronized() ) {
+                jacobin.log.log( msg: "Abstract method \(method.name) in \(klass.shortName) has invalid attributes",
+                    level: Logger.Level.SEVERE )
+                throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
+            }
+
+            if klass.version >= 51 && method.name == "<clinit>" {
+                if method.isStatic() == false {
+                    jacobin.log.log( msg: "<clinit> method \(method.name) in \(klass.shortName) should be static",
+                        level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
+                }
+            }
         }
-
     }
 }
