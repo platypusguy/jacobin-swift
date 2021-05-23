@@ -105,7 +105,7 @@ class ClassParser {
 
             // ...and process the fields
             if klass.fieldCount > 0  {
-                for i in 1...klass.fieldCount {
+                for _ in 1...klass.fieldCount {
                     let field = Field()
                     location = field.load( klass: klass, location: location )
                     klass.fields.append( field )
@@ -118,7 +118,7 @@ class ClassParser {
             location += 2
 
             if klass.methodCount > 0 {
-                for i in 1...( klass.methodCount ) {
+                for _ in 1...( klass.methodCount ) {
                     let mi = MethodInfo()
                     location = mi.read( klass: klass, location: location )
                     mi.log( klass: klass )

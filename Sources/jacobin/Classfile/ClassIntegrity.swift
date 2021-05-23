@@ -58,10 +58,30 @@ class ClassIntegrity {
             if klass.version >= 51 && method.name == "<clinit>" {
                 if method.isStatic() == false {
                     jacobin.log.log( msg: "<clinit> method \(method.name) in \(klass.shortName) should be static",
-                        level: Logger.Level.SEVERE )
+                                     level: Logger.Level.SEVERE )
                     throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
                 }
             }
+
+            // check the integrity of the code attribute, if any.
+            // consult: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.7.3
+            if method.codeLength > 0 {
+                if method.code.count != method.codeLength {
+                    jacobin.log.log( msg: "method \(method.name) in \(klass.shortName) has invalid code attribute",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
+                }
+
+                if method.codeLength >= 65536 {
+                    jacobin.log.log( msg: "method \(method.name) in \(klass.shortName) has code length > max allowed",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
+                }
+
+
+
+            }
+
         }
     }
 }
