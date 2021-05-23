@@ -36,7 +36,7 @@ class Classloader {
     func add( name: String ) {
         if cl[name] != nil { return } // do nothing if the class is already loaded
                                       // TODO: go up the chain of classloaders
-        var klass = LoadedClass()
+        let klass = LoadedClass()
         do {
             try ClassParser.parseClassfile(name: name, klass: klass )
             if name != "bootstrap" { //bootstrap-loaded classes don't require an integrity check
