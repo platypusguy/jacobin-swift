@@ -63,8 +63,17 @@ class CodeAttribute: Attribute {
                 Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc+1 )
         currLoc += 2
         print( "Class \(klass.shortName), Method \(methodData.name), exception table length: \(exceptionTableLength)" )
-
-        //TODO: add handling of exception table when there is one
+        if exceptionTableLength > 0 {
+            for _ in 1...exceptionTableLength {
+                var ee = Method.ExceptionEntry()
+                ee.startPc   = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
+                ee.endPc     = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 3 )
+                ee.handlerPc = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 5 )
+                ee.catchType = Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 7 )
+                methodData.exceptionTable.append( ee )
+                currLoc += 8
+            }
+        }
 
         // get the code attribute count
         let codeAttrCount =
@@ -72,29 +81,31 @@ class CodeAttribute: Attribute {
         currLoc += 2
         print( "Class \(klass.shortName), Method \(methodData.name), code attribute count: \(codeAttrCount)" )
 
-        for _ in 1...codeAttrCount {
-            // handle the code attributes
-            let codeAttrNamePointer =
+        if codeAttrCount > 0 {
+            for _ in 1...codeAttrCount {
+                // handle the code attributes
+                let codeAttrNamePointer =
                     Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: currLoc + 1 )
-            currLoc += 2
+                currLoc += 2
 
-            let codeAttrName =
-                    Utility.getUTF8stringFromConstantPoolIndex( klass:klass, index: codeAttrNamePointer )
-            print( "Class \(klass.shortName), Method \(methodData.name), code attribute: \(codeAttrName)" )
+                let codeAttrName =
+                    Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: codeAttrNamePointer )
+                print( "Class \(klass.shortName), Method \(methodData.name), code attribute: \(codeAttrName)" )
 
-            if codeAttrName == "LineNumberTable" {
-                let lnt = LineNumberTable()
-                currLoc = lnt.load( klass: klass.rawBytes, loc: currLoc )
-                for i in 0...lnt.entryCount-1 {
-                    let pc   = lnt.entries[i].pc
-                    let line = lnt.entries[i].line
-                    var entry : [Int] = []; entry.append( pc ); entry.append( line )
-                    methodData.lineNumTable.append( entry )
+                if codeAttrName == "LineNumberTable" {
+                    let lnt = LineNumberTable()
+                    currLoc = lnt.load( klass: klass.rawBytes, loc: currLoc )
+                    for i in 0...lnt.entryCount - 1 {
+                        let pc = lnt.entries[i].pc
+                        let line = lnt.entries[i].line
+                        var entry: [Int] = []; entry.append( pc ); entry.append( line )
+                        methodData.lineNumTable.append( entry )
+                    }
                 }
-            }
-            else  { //skip over the other code attributes for the nonce
-                print( "Class \(klass.shortName), Method \(methodData.name), Code attribute: \( codeAttrName ) (skipped)" )
-                break // and stop examining the attributes
+                else { //skip over the other code attributes for the nonce
+                    print( "Class \(klass.shortName), Method \(methodData.name), Code attribute: \(codeAttrName) (skipped)" )
+                    break // and stop examining the attributes
+                }
             }
         }
     }
