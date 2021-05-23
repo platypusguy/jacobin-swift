@@ -54,7 +54,7 @@ class Field {
         print( "Class \(klass.shortName), field: \(name), description: \(description), attributes: \(attrCount)" )
 
         if attrCount > 0 {
-            for i in 1...attrCount {
+            for _ in 1...attrCount {
                 // var containing the constant value, if any is specified
                 var value: Any = ""
 
@@ -88,7 +88,7 @@ class Field {
                         case .intConst:
                             let cpIntConst =  cpRec as! CpIntegerConstant
                             value = cpIntConst.int
-                            print( "field \(name) is integer intialized to: \(value)" )
+                            print( "field \(name) is integer initialized to: \(value)" )
                         default:
                             print( "field \(name) is initialized" )
                             value = "?"
