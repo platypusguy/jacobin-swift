@@ -21,6 +21,7 @@ class Method {
     var exceptionTableLength = 0
     struct ExceptionEntry {
         var startPc = 0
+        var endPc = 0
         var handlerPc = 0
         var catchType = 0
     }
