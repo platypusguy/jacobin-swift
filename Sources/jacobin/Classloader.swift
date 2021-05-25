@@ -47,6 +47,9 @@ class Classloader {
         catch JVMerror.ClassFormatError {
             shutdown( successFlag: false ) // error msg has already been shown to user
         }
+        catch JVMerror.ClassVerificationError( let msg ) {
+            log.log(msg: "Error info: \(msg)", level: Logger.Level.SEVERE )
+        }
         catch { // any other errors are unexpected, we should tell the user
             log.log( msg: "Unexpected error loading class \(name)",
                      level: Logger.Level.SEVERE)
