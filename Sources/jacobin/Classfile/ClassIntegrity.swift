@@ -15,12 +15,36 @@ class ClassIntegrity {
     /// - Throws: JVMerror.ClassFormatError (principally)
     static func check( klass: LoadedClass ) throws {
         //Notes: the integrity of superclass entries is verified when they're loaded
+        try checkConstantPool( klass: klass )
 
         if klass.methodCount > 0 {
             for i in 0...klass.methodCount - 1 {
                 let method = klass.methodInfo[i]
                 try checkMethodAccessFlags( method: method, klass: klass )
                 try checkCodeAttribute( method: method, klass: klass )
+            }
+        }
+    }
+
+    /// checks the constant pool entries. Most of the entries are checked fairly
+    /// thoroughly at the time they're created/inserted into the constant pool,
+    /// so this checks other aspects, rather than duplicating any tests
+    ///
+    static func checkConstantPool( klass: LoadedClass ) throws {
+        let cp : [CpEntryTemplate] = klass.cp
+        for i in 1..<klass.constantPoolCount {
+            let cpe = cp[i]
+            switch( cpe.type ) {
+                case .methodHandle,
+                     .methodType,
+                     .invokeDynamic:
+                    if klass.version < 51 {
+                        jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
+                                         level: Logger.Level.SEVERE )
+                        throw JVMerror.ClassVerificationError( msg: "in: \(#file), func: \(#function) line: \(#line)" )
+                    }
+
+                default: continue
             }
         }
     }
