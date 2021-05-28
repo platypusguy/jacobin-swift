@@ -95,9 +95,15 @@ class CommandLineProcessor {
 
             //handle all args/params that start with one or more hyphens
 
-            if arg.starts( with: "-X" ) { // we don't currently support any of the -X switches. We will though.
-                fputs( "Parameter \(arg) not supported. Ignored.\n", stderr )
-                continue
+            if arg.starts( with: "-X" ) { // we support very few of the -X... switches currently
+                switch arg {
+                case "-Xverify:none":   globals.verifyBytecode = .none
+                case "-Xverify:remote": globals.verifyBytecode = .remote
+                case "-Xverify:all":    globals.verifyBytecode = .all
+                default:
+                    fputs( "Parameter \(arg) not supported. Ignored.\n", stderr )
+                    continue
+                }
             }
             else {
                 switch arg {

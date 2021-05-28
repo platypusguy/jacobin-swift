@@ -24,6 +24,10 @@ struct Globals {
     var systemLoader    = Classloader( name: "system", parent: "bootstrap" )
     var assertionStatus = true //default assertion status is that assertions are executed. This is only for start-up.
 
+    var verifyBytecode  = verifyLevel.remote
+    // 0 = no verification, 1=remote (non-bootloader), 2=all classes
+    enum verifyLevel : Int { case none = 0, remote = 1, all = 2 }
+
     // ---- jacobin version info -----
     let version = "0.1.0"
 }

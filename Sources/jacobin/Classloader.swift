@@ -39,8 +39,17 @@ class Classloader {
         let klass = LoadedClass()
         do {
             try ClassParser.parseClassfile(name: name, klass: klass )
-            if name != "bootstrap" { //bootstrap-loaded classes don't require an integrity check
-                try ClassIntegrity.check( klass: klass )
+
+            //integrity check of the parsed class defaults to true for non-
+            // bootstrap classes. However, this can be changed on the command
+            // line with the -Xverify option, which we consult here via the
+            // globals.verifyBytecode setting
+
+            if globals.verifyBytecode != .none {
+                if( name == "bootstrap " && globals.verifyBytecode == .all ) ||
+                    name != "bootstrap" {
+                    try ClassIntegrity.check( klass: klass )
+                }
             }
             insert( name: name, klass: klass )
         }
