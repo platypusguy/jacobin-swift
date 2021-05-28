@@ -40,7 +40,7 @@ class LoadedClass {
 
 }
 
-enum classStatus  :  Int { case NOT_VERIFIED, PRELIM_VERIFIED, VERIFIED, LINKED, PREPARED }
+enum classStatus  :  Int { case NOT_VERIFIED, PRELIM_VERIFIED, CHECKED, VERIFIED, LINKED, PREPARED }
 
 
 // ==== the classes for each type of entry in the constant pool and in the rest of the class ====

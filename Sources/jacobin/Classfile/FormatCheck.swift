@@ -6,7 +6,7 @@
  */
 import Foundation
 
-class ClassIntegrity {
+class FormatCheck {
 
     /// does a complete integrity check of the class, making sure of the requirements as
     /// stated in: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.8
