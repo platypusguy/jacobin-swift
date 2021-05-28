@@ -50,6 +50,7 @@ class Classloader {
                     name != "bootstrap" {
                     try FormatCheck.check( klass: klass )
                     klass.status = .CHECKED
+                    log.log( msg: "Class \(klass.shortName) format checked", level: Logger.Level.FINEST )
                 }
             }
             insert( name: name, klass: klass )
