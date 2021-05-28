@@ -205,8 +205,7 @@ class ConstantPool {
 
             case .methodType: // method type https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.9
                 let methodIndex =
-                        Utility.getInt16from2Bytes( msb: klass.rawBytes[byteCounter+1],
-                                                    lsb: klass.rawBytes[byteCounter+2] )
+                        Utility.getIntFrom2Bytes( bytes: klass.rawBytes, index: byteCounter+1 )
                 byteCounter += 2
                 let methodType = CpMethodType( index: methodIndex )
                 klass.cp.append( methodType )

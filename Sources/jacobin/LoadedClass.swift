@@ -175,9 +175,9 @@ class CpEntryMethodHandle: CpEntryTemplate { // method reference (15)
 class CpMethodType: CpEntryTemplate { // constant method type (16)
     var constantMethodIndex = 0
 
-    init( index: Int16 ) {
+    init( index: Int) {
         super.init( type: 16 )
-        constantMethodIndex = Int(index)
+        constantMethodIndex = index
     }
 }
 
