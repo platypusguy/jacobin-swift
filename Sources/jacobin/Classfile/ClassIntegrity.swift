@@ -26,38 +26,90 @@ class ClassIntegrity {
         }
     }
 
-    /// checks the constant pool entries. Most of the entries are checked fairly
-    /// thoroughly at the time they're created/inserted into the constant pool,
-    /// so this checks other aspects, rather than duplicating any tests
-    ///
+    /// checks the constant pool entries.
     static func checkConstantPoolVersion( klass: LoadedClass ) throws {
         let cp : [CpEntryTemplate] = klass.cp
         for i in 1..<klass.constantPoolCount {
             let cpe = cp[i]
             switch( cpe.type ) {
-                case .methodHandle,
-                     .methodType,
-                     .invokeDynamic:
-                    if klass.version < 51 { //these require Java 7 at minimum
+                case .methodHandle:
+                    // see https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.8
+                    if klass.version < 51 { // methodHandle requires Java 7 at minimum
                         jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
                                          level: Logger.Level.SEVERE )
                         throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
                     }
-                case .module,
-                     .package:
-                    if klass.version < 53 { //these require Java 9 at minimum
-                        jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
-                            level: Logger.Level.SEVERE )
-                        throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
-                    }
-                case .dynamic:
-                    if klass.version < 55 { // requires Java 11 at minimum
-                        jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
-                            level: Logger.Level.SEVERE )
-                        throw JVMerror.ClassVerificationError( msg: "i\(#file), func: \(#function) line: \(#line)" )
-                    }
-                default:
-                    continue
+
+                    let cpMethHandle = cpe as! CpEntryMethodHandle
+                    switch( cpMethHandle.referenceKind ) {
+                    case 1, 2, 3, 4:
+                        if cp[ cpMethHandle.referenceIndex ].type != .field {
+                            jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                  "for reference kind \( cpMethHandle.referenceKind)",
+                                             level: Logger.Level.SEVERE )
+                            throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                        }
+                    case 5, 8:
+                        if cp[ cpMethHandle.referenceIndex ].type != .method {
+                            jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                  "for reference kind \(cpMethHandle.referenceKind)",
+                                             level: Logger.Level.SEVERE )
+                            throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                        }
+                    case 6, 7:
+                        if klass.version < 52 {
+                            if cp[ cpMethHandle.referenceIndex ].type != .method {
+                                jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                      "for reference kind \(cpMethHandle.referenceKind)",
+                                                 level: Logger.Level.SEVERE )
+                                throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                            }
+                        }
+                        else {
+                            if cp[ cpMethHandle.referenceIndex ].type != .method ||
+                               cp[ cpMethHandle.referenceIndex ].type != .interface {
+                                jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                      "for reference kind \(cpMethHandle.referenceKind)",
+                                                 level: Logger.Level.SEVERE )
+                                throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                            }
+                        }
+                    case 9:
+                        if cp[ cpMethHandle.referenceIndex ].type != .interface {
+                            jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                  "for reference kind \(cpMethHandle.referenceKind)",
+                                             level: Logger.Level.SEVERE )
+                            throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                        }
+                    default:
+                            jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference kind: " +
+                                                  "\(cpMethHandle.referenceKind)",
+                                             level: Logger.Level.SEVERE )
+                            throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                }
+
+            case .methodType,
+                 .invokeDynamic:
+                if klass.version < 51 { //these require Java 7 at minimum
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
+                                     level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                }
+            case .module,
+                 .package:
+                if klass.version < 53 { //these require Java 9 at minimum
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
+                        level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassVerificationError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                }
+            case .dynamic:
+                if klass.version < 55 { // requires Java 11 at minimum
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
+                        level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassVerificationError( msg: "i\(#file), func: \(#function) line: \(#line)" )
+                }
+            default:
+                continue
             }
         }
     }
