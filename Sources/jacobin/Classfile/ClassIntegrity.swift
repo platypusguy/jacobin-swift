@@ -124,7 +124,7 @@ class ClassIntegrity {
 
         // check the exception table of the code attribute
         if method.exceptionTable.count > 0 {
-            for i in 1...method.exceptionTable.count {
+            for i in 0..<method.exceptionTable.count {
                 let mex = method.exceptionTable[i]
                 if mex.startPc < 0 ||
                    mex.endPc > method.codeLength ||
