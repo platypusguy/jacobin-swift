@@ -25,7 +25,7 @@ struct Globals {
     var assertionStatus = true //default assertion status is that assertions are executed. This is only for start-up.
 
     var verifyBytecode  = verifyLevel.remote
-    // 0 = no verification, 1=remote (non-bootloader), 2=all classes
+    // 0 = no verification, 1=remote (non-bootloader classes), 2=all classes
     enum verifyLevel : Int { case none = 0, remote = 1, all = 2 }
 
     // ---- jacobin version info -----

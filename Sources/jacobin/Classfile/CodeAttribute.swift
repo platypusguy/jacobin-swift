@@ -47,15 +47,16 @@ class CodeAttribute: Attribute {
         currLoc += 2
 
         // get the length of the codebyte array
-        let codeLength = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLoc+1 )
-        print( "Class \(klass.shortName), Method \(methodData.name), size of bytecode: \(codeLength)" )
+        methodData.codeLength = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: currLoc+1 )
+        print( "Class \(klass.shortName), Method \(methodData.name), size of bytecode: \(methodData.codeLength)" )
         currLoc += 4
 
         // load the bytecode into code array
-        for i in 1...codeLength {
+        for i in 1...methodData.codeLength {
             methodData.code.append( klass.rawBytes[currLoc+i] )
         }
-        currLoc += codeLength
+
+        currLoc += methodData.codeLength
         print( "location: \(currLoc)" )
 
         // get exception table length (= number of entries, rather than length in bytes)
