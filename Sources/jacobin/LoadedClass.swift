@@ -27,6 +27,7 @@ class LoadedClass {
     var methodCount = 0
     var methodInfo : [Method] = []
     var attributes : [Attribute] = []
+    var bsms : [BootstrapMethod] = []
 
     var classIsPublic      = false
     var classIsFinal       = false

@@ -135,17 +135,22 @@ class ClassParser {
                 let attrName =
                     Utility.getUTF8stringFromConstantPoolIndex( klass: klass, index: attributeID )
                 location += 2
-                let attrSize =
-                        Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: location+1 )
+                let attrSize = Utility.getIntfrom4Bytes( bytes: klass.rawBytes, index: location+1 )
                 location += 4
 
                 switch attrName {
+                case "BootstrapMethods":
+                    let bsm = BootstrapMethodsAttribute( name: attrName, length: attrSize )
+                    try bsm.load( klass: klass, loc: location )
+                    bsm.log( klass: klass )
+                    location += attrSize
+
                 case "SourceFile":
                     let sfa = SourceFileAttribute( name: attrName, length: attrSize )
                     sfa.load( klass: klass, loc: location )
                     klass.attributes.append( sfa )
                     sfa.log( className: klass.shortName )
-                    location += 2
+                    location += attrSize
 
                 default:
                     print( "Attribute: \(attrName) not processed in class \(klass.shortName)" )
