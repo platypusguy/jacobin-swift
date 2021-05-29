@@ -153,8 +153,8 @@ class ClassParser {
                 }
             }
         }
-        catch JVMerror.ClassFormatError( msg: klass.path ) {
-            log.log( msg: "ClassFormatError in \(name)", level: Logger.Level.SEVERE )
+        catch JVMerror.ClassFormatError( let msg ) {
+            log.log( msg: "ClassFormatError: \( msg )", level: Logger.Level.SEVERE )
             throw JVMerror.ClassFormatError( msg: "" )
         }
 
