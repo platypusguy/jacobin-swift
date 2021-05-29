@@ -273,7 +273,7 @@ class ConstantPool {
     // make sure all the pointers point to the correct items and that values are within the right range
     static func verify( klass: LoadedClass ) throws {
         let className = klass.path
-        for n in 1...klass.constantPoolCount - 1 {
+        for n in 1..<klass.constantPoolCount {
             switch ( klass.cp[n].type ) {
             case .invalid: // dummy entries created by the JVM ( for 0th element, longs, doubles, etc.)
                 continue
@@ -383,45 +383,100 @@ class ConstantPool {
                 }
 
             case .methodHandle: // method handle
-                if klass.version < 51 {
-                    jacobin.log.log( msg: "Error invalid methodHandle entry in \(className) Exiting.",
-                                     level: Logger.Level.SEVERE )
-                    throw JVMerror.ClassFormatError( msg: "" )
+                // see https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.8
+                if klass.version < 51 { // methodHandle requires Java 7 at minimum
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid instruction version",
+                        level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                }
+                let cpMethHandle =  klass.cp[n] as! CpEntryMethodHandle
+                switch( cpMethHandle.referenceKind ) {
+                    case 1, 2, 3, 4:
+                        if klass.cp[ cpMethHandle.referenceIndex ].type != .field {
+                            jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                  "for reference kind \( cpMethHandle.referenceKind)",
+                                level: Logger.Level.SEVERE )
+                            throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                        }
+                    case 5, 8:
+                        if klass.cp[ cpMethHandle.referenceIndex ].type != .method {
+                            jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                  "for reference kind \(cpMethHandle.referenceKind)",
+                                level: Logger.Level.SEVERE )
+                            throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                        }
+                    case 6, 7:
+                        if klass.version < 52 {
+                            if klass.cp[ cpMethHandle.referenceIndex ].type != .method {
+                                jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                      "for reference kind \(cpMethHandle.referenceKind)",
+                                    level: Logger.Level.SEVERE )
+                                throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                            }
+                        }
+                        else {
+                            if klass.cp[ cpMethHandle.referenceIndex ].type != .method ||
+                               klass.cp[ cpMethHandle.referenceIndex ].type != .interface {
+                                jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                      "for reference kind \(cpMethHandle.referenceKind)",
+                                    level: Logger.Level.SEVERE )
+                                throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                            }
+                        }
+                    case 9:
+                        if klass.cp[ cpMethHandle.referenceIndex ].type != .interface {
+                            jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference index " +
+                                                  "for reference kind \(cpMethHandle.referenceKind)",
+                                level: Logger.Level.SEVERE )
+                            throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                        }
+                    default:
+                        jacobin.log.log( msg: "Class\(klass.shortName) has a method handle w/ invalid reference kind: " +
+                                              "\(cpMethHandle.referenceKind)",
+                            level: Logger.Level.SEVERE )
+                        throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
                 }
 
             case .methodType: // method type
+                // see https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.4.9
                 if klass.version < 51 {
                     jacobin.log.log( msg: "Error invalid methodType entry in \(className) Exiting.",
                                      level: Logger.Level.SEVERE )
                     throw JVMerror.ClassFormatError( msg: "" )
                 }
+                let cpMethType = klass.cp[n] as! CpMethodType
+                if klass.cp[cpMethType.constantMethodIndex].type != .UTF8 {
+                    jacobin.log.log( msg: "Class\(klass.shortName) has method type that does not point to UTF8 record",
+                        level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
+                }
 
             case .dynamic: // constant dynamic
-                if klass.version < 55 {
-                    jacobin.log.log( msg: "Error invalid constant dynamic entry in \(className) Exiting.",
+                if klass.version < 55 { // requires Java 11 at minimum
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid dynamic constant pool entry (version #)",
                                      level: Logger.Level.SEVERE )
-                    throw JVMerror.ClassFormatError( msg: "" )
+                    throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
                 }
 
                 case .invokeDynamic: // invokedynamic bytecode
                 if klass.version < 51 {
-                    jacobin.log.log( msg: "Error invalid invokedynamic entry in \(className) Exiting.",
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid invokedynamic constant pool entry (version #)",
                                      level: Logger.Level.SEVERE )
-                    throw JVMerror.ClassFormatError( msg: "" )
+                    throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
                 }
 
             case .module: // JPMS module
-                if klass.version < 53 {
-                    jacobin.log.log( msg: "Error invalid module entry in \(className) Exiting.",
-                                     level: Logger.Level.SEVERE )
-                    throw JVMerror.ClassFormatError( msg: "" )
+                if klass.version < 53 { // requires Java 9 at minimum
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid module constant pool entry (version #)",
+                        level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
                 }
 
             case .package: // JPMS package
-                if klass.version < 53 {
-                    jacobin.log.log( msg: "Error invalid package entry in \(className) Exiting.",
-                                     level: Logger.Level.SEVERE )
-                    throw JVMerror.ClassFormatError( msg: "" )
+                if klass.version < 53 { // requires Java 9 at minimum
+                    jacobin.log.log( msg: "Class\(klass.shortName) has invalid package constant pool entry (version #)",
+                        level: Logger.Level.SEVERE )
+                    throw JVMerror.ClassFormatError( msg: "\(#file), func: \(#function) line: \(#line)" )
                 }
             default: continue // for the nonce, eventually should be an error.
             }

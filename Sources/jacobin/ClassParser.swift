@@ -41,7 +41,7 @@ class ClassParser {
                 log.log(
                         msg: "Error: this version of Jacobin supports only Java classes at or below Java 11. Exiting.",
                         level: Logger.Level.SEVERE )
-                shutdown( successFlag: false )
+                throw JVMerror.ClassFormatError( msg: "" )
             } else {
                 klass.version = version;
                 klass.status = classStatus.PRELIM_VERIFIED
