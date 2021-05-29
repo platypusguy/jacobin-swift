@@ -13,14 +13,14 @@ import Foundation
 class Interface {
 
     /// read the interface data, which is at the constant pool
-    /// entry pointed to by pointer, which should be a CONSTANT_Class
+    /// entry pointed to by index, which should be a CONSTANT_Class
     /// - Parameters:
     ///   - klass: the class containing the constant pool and the interface
     ///   - index: pointer to the constant pool entry for this interface
     static func process( klass: LoadedClass, index: Int ) {
         let interface = klass.cp[index] as! CpEntryClassRef
         let intNameIdx = interface.classNameIndex
-        if intNameIdx <= 0 || intNameIdx >= klass.constantPoolCount {
+        if intNameIdx < 1 || intNameIdx >= klass.constantPoolCount {
             jacobin.log.log( msg: "Error: In \(klass.shortName) - invalid UTF8 index \(index) in Interface entry",
                              level: Logger.Level.INFO )
             return
@@ -36,7 +36,7 @@ class Interface {
         if ( klass.interfaceCount > 0 ) {
             for i in 1...klass.interfaceCount {
                 jacobin.log.log( msg: "Class: \(klass.path) implements: \(klass.interfaces[i-1])",
-                    level: Logger.Level.FINEST )
+                                 level: Logger.Level.FINEST )
             }
         }
     }
