@@ -1,5 +1,5 @@
 [![Swift](https://github.com/platypusguy/jacobin/actions/workflows/swift.yml/badge.svg)](https://github.com/platypusguy/jacobin/actions/workflows/swift.yml)
-https://img.shields.io/github/license/platypusguy/jacobin
+![GitHub](https://img.shields.io/github/license/platypusguy/jacobin)
 
 # jacobin
 
