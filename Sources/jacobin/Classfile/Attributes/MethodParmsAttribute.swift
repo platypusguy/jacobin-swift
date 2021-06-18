@@ -6,7 +6,7 @@
  */
 import Foundation
 
-/// handles data on method parametners. Details at:
+/// handles data on method parameters. Details at:
 /// https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.7.24
 class MethodParmsAttribute: Attribute {
     /*
