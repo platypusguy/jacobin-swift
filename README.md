@@ -52,4 +52,4 @@ Not started yet
 GC is handled by the Swift runtime, which has its own GC
 
 # Thanks
-Any of the above pages carries a right-side panel in which we thank vendors and programmers who have made the Jacobin project possible. There are many and we are deeply grateful to them.
+The overview page carries a right-side panel that expresses our thanks to vendors and programmers who have made the Jacobin project possible. They are many and we are deeply grateful to them.
