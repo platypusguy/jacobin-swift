@@ -38,7 +38,7 @@ A more-than-minimal JVM written in Swift.
 * Automate loading of core Java classes (Object, etc.)
 
 ### Verification, Linking, Preparation, Initialization
-* Performs integrity check bytecode is correct. This is the focus of current coding work
+* Performs integrity check bytecode is correct. :pencil2: This is the focus of current coding work
 
 **To do:**
 * Linking and verification
