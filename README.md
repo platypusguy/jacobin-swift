@@ -52,4 +52,4 @@ Not started yet
 GC is handled by the Swift runtime, which has its own GC
 
 # Thanks
-Thank you to JetBrains for CLion and other excellent tools, Github for hosting the code, the Java team for excellent JVM documentation, and to Ben Evans and Anton Shipalev for articles describing the deepest innards of the JVM.
+My deepest thanks to JetBrains for CLion and other excellent tools, Github for hosting the code, the Java team for excellent JVM documentation, and to Ben Evans and Anton Shipilev for articles describing the deepest innards of the JVM.
