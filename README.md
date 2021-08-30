@@ -5,7 +5,7 @@
 
 A more-than-minimal JVM written in Swift. 
 
-[This overview](https://github.com/platypusguy/jacobin/wiki/Jacobin-Overview) gives the background on this project, including its aspirations and the features that it supports. The remaining pages discuss the basics of JVM operation and, where applicable, how Jacobin implements the various steps, noting any items that would be of particular interest to JVM cognoscenti. I've included references to the official JVM docs, where I can both as a reference for you, the reader, and for the Jacobin team's easy reference. 
+This overview gives the background on this project, including its aspirations and the features that it supports. The remaining pages discuss the basics of JVM operation and, where applicable, how Jacobin implements the various steps, noting any items that would be of particular interest to JVM cognoscenti. I've included references to the official JVM docs, where I can both as a reference for you, the reader, and for the Jacobin team's easy reference. 
 
 # Status
 ## Intended feature set:
@@ -52,4 +52,4 @@ Not started yet
 GC is handled by the Swift runtime, which has its own GC
 
 # Thanks
-The overview page carries a right-side panel that expresses our thanks to vendors and programmers who have made the Jacobin project possible. They are many and we are deeply grateful to them.
+Thank you to JetBrains for CLion and other excellent tools, Github for hosting the code, the Java team for excellent JVM documentation, and to Ben Evans and Anton Shipalev for articles describing the deepest innards of the JVM.
