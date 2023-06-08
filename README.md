@@ -1,4 +1,5 @@
-[![Swift](https://github.com/platypusguy/jacobin/actions/workflows/swift.yml/badge.svg)](https://github.com/platypusguy/jacobin/actions/workflows/swift.yml)
+## This project has been replaced by the [jacobin project](https://github.com/platypusguy/jacobin-swift/) (JVM written in Go). Please go [there](https://github.com/platypusguy/jacobin-swift/) for a considerably more advanced version of this original project. 
+
 ![GitHub](https://img.shields.io/github/license/platypusguy/jacobin)
 
 # jacobin
